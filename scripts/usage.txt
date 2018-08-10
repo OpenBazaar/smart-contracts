@@ -1,0 +1,42 @@
+You can refer help command to check what all is allowed and meaning of each parameter
+
+node scripts/signining.js -h
+
+1. Generate message hash using data
+
+node scripts/signing.js generateHash -m "0x546ba5c6abc490e66cb25a081868822c1ceb3abd" -r "0x61adaf40a389761bacf76dfccf682e9200989894" -t 24 -v 1000000000000000000 -d "0x"
+
+
+2. Generate Personal Message Hash using message hash generated in previous step
+
+node scripts/signing.js generatePersonalMessageHash -H 0x9f58461e3ba1c1b24c92db44e8ebfb8c643b4e14e802bf735e15e52dbc355232
+
+3. Generate Personal Message Hash using data
+
+node scripts/signing.js generatePersonalMessageHash -m "0x546ba5c6abc490e66cb25a081868822c1ceb3abd" -r "0x61adaf40a389761bacf76dfccf682e9200989894" -t 24 -v 1000000000000000000 -d "0x"
+
+4. Sign message using private key and personal hash generated in previous step
+
+node scripts/signing.js signMessageUsingPrivateKey -e "5c0d2bebe012f64bf6c19599c2dc607c1e6f99318dd7cc903ded0519778f2275" -s "0x4cb8543eaa17f648b79509e6c95caee0cee1cc49"
+
+5. Sign message using private key and data
+
+node scripts/signing.js signMessageUsingPrivateKey -m "0x546ba5c6abc490e66cb25a081868822c1ceb3abd" -r "0x61adaf40a389761bacf76dfccf682e9200989894" -t 24 -v 1000000000000000000 -d "0x" -p "8954f0143159b26885799d99fe462498536f22ecd967aba64b677497bcd8eccb"
+
+6. Sign message using local web3 provider and message hash generated in step 1
+
+node scripts/signing.js signMessageUsingLocalWeb3 -H "0x9f58461e3ba1c1b24c92db44e8ebfb8c643b4e14e802bf735e15e52dbc355232" -s "0x4cb8543eaa17f648b79509e6c95caee0cee1cc49"
+
+7. Sign message using local web3 provider and data
+
+node scripts/signing.js signMessageUsingLocalWeb3 -m "0x546ba5c6abc490e66cb25a081868822c1ceb3abd" -r "0x61adaf40a389761bacf76dfccf682e9200989894" -t 24 -v 1000000000000000000 -d "0x" -s "0x4cb8543eaa17f648b79509e6c95caee0cee1cc49"
+
+8. Generate hash for preimage
+
+node scripts/signing.js preimageHash -i "sameep"
+
+9. Generate splitpayments data
+
+node scripts/signing.js splitPayments -b 0x8B8d124EAE903DF72A01d7dDE9eA00E6c5938377 -S 0xa6Ac51BB2593e833C629A3352c4c432267714385 -p 30 -P 70 -t 11
+
+####NOTE- Please do not send any funds to the addresses and private keys mentioned in this file. You may loose your funds. These are just for testing
