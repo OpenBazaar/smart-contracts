@@ -32,9 +32,8 @@ contract("Contract Manager contract", function(accounts){
         var version = versions[0][0];
         var status = 0;
         var _implementation = escrowVersion1_0.address;
-        var _auditor = accounts[1];
 
-        var txResult = await this.contractManager.addVersion(contractName, version, status, _implementation, _auditor);
+        var txResult = await this.contractManager.addVersion(contractName, version, status, _implementation);
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
@@ -52,19 +51,13 @@ contract("Contract Manager contract", function(accounts){
         var receivedStatus = versionData[1].toNumber();
         var receivedbugLevel = versionData[2].toNumber();
         receivedImplementation = versionData[3];
-        var receivedAuditor = versionData[4];
-        var receivedAudited = versionData[5];
-        var receivedAuditHash = versionData[6];
-        var receivedAuditReportIPFSPointer = versionData[7];
+        var receivedAudited = versionData[4];
 
         assert.equal(receivedVersion, version, "Received version must match the passed one");
         assert.equal(receivedStatus, status, "Received staus must be the one which was passed");
         assert.equal(receivedbugLevel, 0, "Received bug level must be NONE(0)");
         assert.equal(receivedImplementation, _implementation, "Received implementation must match the passed one");
-        assert.equal(receivedAuditor, _auditor, "Received auditor must match the passed one");
         assert.equal(receivedAudited, false, "Received audited must be false");
-        assert.equal(receivedAuditHash, "0x0000000000000000000000000000000000000000000000000000000000000000", "Received audit hash must be empty bytes32");
-        assert.equal(receivedAuditReportIPFSPointer, "0x", "Received audit report IPFS pointer must be empty bytes");
 
         contractVersions.escrow = new Object();
 
@@ -74,10 +67,7 @@ contract("Contract Manager contract", function(accounts){
         contractVersions.escrow[version].status = receivedStatus;
         contractVersions.escrow[version].bugLevel = receivedbugLevel;
         contractVersions.escrow[version].implementation = receivedImplementation;
-        contractVersions.escrow[version].auditor = receivedAuditor;
         contractVersions.escrow[version].audited = receivedAudited;
-        contractVersions.escrow[version].auditHash = receivedAuditHash;
-        contractVersions.escrow[version].auditReportIPFSPointer = receivedAuditReportIPFSPointer;
     });
 
     it("Add version v1.1 for escrow contract", async()=>{
@@ -88,9 +78,8 @@ contract("Contract Manager contract", function(accounts){
         var version = versions[0][1];
         var status = 0;
         var _implementation = escrowVersion1_1.address;
-        var _auditor = accounts[2];
 
-        var txResult = await this.contractManager.addVersion(contractName, version, status, _implementation, _auditor);
+        var txResult = await this.contractManager.addVersion(contractName, version, status, _implementation);
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
@@ -108,19 +97,13 @@ contract("Contract Manager contract", function(accounts){
         var receivedStatus = versionData[1].toNumber();
         var receivedbugLevel = versionData[2].toNumber();
         receivedImplementation = versionData[3];
-        var receivedAuditor = versionData[4];
-        var receivedAudited = versionData[5];
-        var receivedAuditHash = versionData[6];
-        var receivedAuditReportIPFSPointer = versionData[7];
+        var receivedAudited = versionData[4];
 
         assert.equal(receivedVersion, version, "Received version must match the passed one");
         assert.equal(receivedStatus, status, "Received staus must be the one which was passed");
         assert.equal(receivedbugLevel, 0, "Received bug level must be NONE(0)");
         assert.equal(receivedImplementation, _implementation, "Received implementation must match the passed one");
-        assert.equal(receivedAuditor, _auditor, "Received auditor must match the passed one");
         assert.equal(receivedAudited, false, "Received audited must be false");
-        assert.equal(receivedAuditHash, "0x0000000000000000000000000000000000000000000000000000000000000000", "Received audit hash must be empty bytes32");
-        assert.equal(receivedAuditReportIPFSPointer, "0x", "Received audit report IPFS pointer must be empty bytes");
 
         contractVersions.escrow[version] = new Object();
         
@@ -128,10 +111,7 @@ contract("Contract Manager contract", function(accounts){
         contractVersions.escrow[version].status = receivedStatus;
         contractVersions.escrow[version].bugLevel = receivedbugLevel;
         contractVersions.escrow[version].implementation = receivedImplementation;
-        contractVersions.escrow[version].auditor = receivedAuditor;
         contractVersions.escrow[version].audited = receivedAudited;
-        contractVersions.escrow[version].auditHash = receivedAuditHash;
-        contractVersions.escrow[version].auditReportIPFSPointer = receivedAuditReportIPFSPointer;
 
 
     });
@@ -144,9 +124,8 @@ contract("Contract Manager contract", function(accounts){
         var version = versions[0][1];
         var status = 0;
         var _implementation = escrowVersion1_1.address;
-        var _auditor = accounts[2];
         try{
-        await this.contractManager.addVersion(contractName, version, status, _implementation, _auditor);
+        await this.contractManager.addVersion(contractName, version, status, _implementation);
         assert.equal(true, false, "Should not be able to add version with v1.1 as it is already registered");
     
         } catch(error){
@@ -162,9 +141,8 @@ contract("Contract Manager contract", function(accounts){
         var version = versions[0][1];
         var status = 0;
         var _implementation = escrowVersion1_1.address;
-        var _auditor = accounts[2];
         try{
-        await this.contractManager.addVersion(contractName, version, status, _implementation, _auditor);
+        await this.contractManager.addVersion(contractName, version, status, _implementation);
         assert.equal(true, false, "Should not be able to add version with empty contract name");
     
         } catch(error){
@@ -180,9 +158,8 @@ contract("Contract Manager contract", function(accounts){
         var version = '';
         var status = 0;
         var _implementation = escrowVersion1_1.address;
-        var _auditor = accounts[2];
         try{
-        await this.contractManager.addVersion(contractName, version, status, _implementation, _auditor);
+        await this.contractManager.addVersion(contractName, version, status, _implementation);
         assert.equal(true, false, "Should not be able to version with empty version name");
     
         } catch(error){
@@ -203,30 +180,13 @@ contract("Contract Manager contract", function(accounts){
     }
     });
 
-    it("Mark version as audited from non-auditor account", async()=>{
-        var contractName = contracts[0];
-        var version = versions[0][1];
-        var auditHash = util.keccak256("random hash").toString("hex");
-        var auditReportIPFSPointer = "0x000000012";
-
-        try{
-        await this.contractManager.markVersionAudited(contractName, version, auditHash, auditReportIPFSPointer, {from:accounts[0]});
-        assert.equal(true, false, "Non auditor account should not be able to mark version as audited");
-    
-        } catch(error){
-        assert.notInclude(error.toString(), 'AssertionError', error.message);        
-        }
-    });
-
+   
     it("Mark version as audited from auditor account", async()=>{
         var contractName = contracts[0];
         var version = versions[0][1];
-        var auditHash = "0x" + util.keccak256("random hash").toString("hex");
-        var auditReportIPFSPointer = "0x000012";
 
-        var auditor = contractVersions[contractName][version].auditor;
         
-        var txResult = await this.contractManager.markVersionAudited(contractName, version, auditHash, auditReportIPFSPointer, {from:auditor});
+        var txResult = await this.contractManager.markVersionAudited(contractName, version, {from:ownerAccount});
         
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
@@ -239,18 +199,12 @@ contract("Contract Manager contract", function(accounts){
         var versionData = await this.contractManager.getVersionDetails(contractName, version);
 
        
-        var receivedAudited = versionData[5];
-        var receivedAuditHash = versionData[6];
-        var receivedAuditReportIPFSPointer = versionData[7];
+        var receivedAudited = versionData[4];
 
      
         assert.equal(receivedAudited, true, "Received audited must be true");
-        assert.equal(receivedAuditHash, auditHash, "Received audit hash must be match passed audit hash");
-        assert.equal(receivedAuditReportIPFSPointer, auditReportIPFSPointer, "Received audit report IPFS pointer must match passed pointer");        
         
         contractVersions.escrow[version].audited = receivedAudited;
-        contractVersions.escrow[version].auditHash = receivedAuditHash;
-        contractVersions.escrow[version].auditReportIPFSPointer = receivedAuditReportIPFSPointer;
 
 
     });
@@ -258,13 +212,10 @@ contract("Contract Manager contract", function(accounts){
     it("Mark already audited version as audited from auditor account", async()=>{
         var contractName = contracts[0];
         var version = versions[0][1];
-        var auditHash = "0x" + util.keccak256("random hash").toString("hex");
-        var auditReportIPFSPointer = "0x000012";
 
-        var auditor = contractVersions[contractName][version].auditor;
         try{
 
-        await this.contractManager.markVersionAudited(contractName, version, auditHash, auditReportIPFSPointer, {from:auditor});
+        await this.contractManager.markVersionAudited(contractName, version, {from:ownerAccount});
         
         assert.equal(true, false, "Should not be able to mark already audited version as audited");
     
@@ -458,19 +409,13 @@ contract("Contract Manager contract", function(accounts){
                 var receivedStatus = versionData[1].toNumber();
                 var receivedbugLevel = versionData[2].toNumber();
                 var receivedImplementation = versionData[3];
-                var receivedAuditor = versionData[4];
-                var receivedAudited = versionData[5];
-                var receivedAuditHash = versionData[6];
-                var receivedAuditReportIPFSPointer = versionData[7];
+                var receivedAudited = versionData[4];
 
                 assert.equal(receivedVersion, contractVersions[contractName][versionName].version, "Received version must match the passed one");
                 assert.equal(receivedStatus, contractVersions[contractName][versionName].status, "Received staus must be the one which was passed");
                 assert.equal(receivedbugLevel, contractVersions[contractName][versionName].bugLevel, "Received bug level must match");
                 assert.equal(receivedImplementation, contractVersions[contractName][versionName].implementation, "Received implementation must match the passed one");
-                assert.equal(receivedAuditor, contractVersions[contractName][versionName].auditor, "Received auditor must match the passed one");
                 assert.equal(receivedAudited, contractVersions[contractName][versionName].audited, "Received audited must match");
-                assert.equal(receivedAuditHash, contractVersions[contractName][versionName].auditHash, "Received audit hash must match");
-                assert.equal(receivedAuditReportIPFSPointer, contractVersions[contractName][versionName].auditReportIPFSPointer, "Received audit report IPFS pointer must match");
            }
         
         }
@@ -632,22 +577,48 @@ contract("Contract Manager contract", function(accounts){
 
         var versionData = await this.contractManager.getRecommendedVersion(contractName);
 
-        var receivedVersion = versionData[0];
+        var version = versionData[0];
         
         var status = 3//DEPRECATED;
         
-        try{
-            await this.contractManager.changeStatus(contractName, receivedVersion, status);
-            assert.equal(true, false, "Should not be mark recommended version as DEPRECATED");
-    
-        } catch(error){
-            assert.notInclude(error.toString(), 'AssertionError', error.message);        
-        }
+       
+        await this.contractManager.changeStatus(contractName, version, status);
+        
+        contractVersions[contractName][version].status = status;
+
+        var versionData = await this.contractManager.getRecommendedVersion(contractName);
+
+        var receivedVersion = versionData[0];
+
+        assert.equal(receivedVersion, '', "Recommended version should have been removed");
+        
+        //check version is still there and not removed
+        versionData = await this.contractManager.getVersionDetails(contractName, version);
+
+        var receivedVersion = versionData[0];
+        var receivedStatus = versionData[1].toNumber();
+        var receivedbugLevel = versionData[2].toNumber();
+        var receivedImplementation = versionData[3];
+        var receivedAudited = versionData[4];
+
+        assert.equal(receivedVersion, contractVersions[contractName][version].version, "Received version must match the passed one");
+        assert.equal(receivedStatus, contractVersions[contractName][version].status, "Received staus must be the one which was passed");
+        assert.equal(receivedbugLevel, contractVersions[contractName][version].bugLevel, "Received bug level must match");
+        assert.equal(receivedImplementation, contractVersions[contractName][version].implementation, "Received implementation must match the passed one");
+        assert.equal(receivedAudited, contractVersions[contractName][version].audited, "Received audited must match");
+           
 
     });
 
     it("Change bug level to critical for recommended version of a contract", async()=>{
-        var contractName = contracts[0];
+         var contractName = contracts[0];
+        var version = versions[0][1];
+        var status = 2//PRODUCTION;
+        await this.contractManager.changeStatus(contractName, version, status);
+        contractVersions[contractName][version].status = status;
+
+        await this.contractManager.markRecommendedVersion(contractName,version);
+
 
         var versionData = await this.contractManager.getRecommendedVersion(contractName);
 
@@ -671,21 +642,13 @@ contract("Contract Manager contract", function(accounts){
         var receivedStatus = versionData[1].toNumber();
         var receivedbugLevel = versionData[2].toNumber();
         var receivedImplementation = versionData[3];
-        var receivedAuditor = versionData[4];
-        var receivedAudited = versionData[5];
-        var receivedAuditHash = versionData[6];
-        var receivedAuditReportIPFSPointer = versionData[7];
-        var recommended = versionData[9];
+        var receivedAudited = versionData[4];
 
         assert.equal(receivedVersion, contractVersions[contractName][version].version, "Received version must match the passed one");
         assert.equal(receivedStatus, contractVersions[contractName][version].status, "Received staus must be the one which was passed");
         assert.equal(receivedbugLevel, contractVersions[contractName][version].bugLevel, "Received bug level must match");
         assert.equal(receivedImplementation, contractVersions[contractName][version].implementation, "Received implementation must match the passed one");
-        assert.equal(receivedAuditor, contractVersions[contractName][version].auditor, "Received auditor must match the passed one");
         assert.equal(receivedAudited, contractVersions[contractName][version].audited, "Received audited must match");
-        assert.equal(receivedAuditHash, contractVersions[contractName][version].auditHash, "Received audit hash must match");
-        assert.equal(receivedAuditReportIPFSPointer, contractVersions[contractName][version].auditReportIPFSPointer, "Received audit report IPFS pointer must match");
-        assert.equal(recommended, false, "Version should not be recommended anymore");
 
 
     });
@@ -770,21 +733,13 @@ contract("Contract Manager contract", function(accounts){
         var receivedStatus = versionData[1].toNumber();
         var receivedbugLevel = versionData[2].toNumber();
         var receivedImplementation = versionData[3];
-        var receivedAuditor = versionData[4];
-        var receivedAudited = versionData[5];
-        var receivedAuditHash = versionData[6];
-        var receivedAuditReportIPFSPointer = versionData[7];
-        var recommended = versionData[9];
+        var receivedAudited = versionData[4];
 
         assert.equal(receivedVersion, contractVersions[contractName][version].version, "Received version must match the passed one");
         assert.equal(receivedStatus, contractVersions[contractName][version].status, "Received staus must be the one which was passed");
         assert.equal(receivedbugLevel, contractVersions[contractName][version].bugLevel, "Received bug level must match");
         assert.equal(receivedImplementation, contractVersions[contractName][version].implementation, "Received implementation must match the passed one");
-        assert.equal(receivedAuditor, contractVersions[contractName][version].auditor, "Received auditor must match the passed one");
         assert.equal(receivedAudited, contractVersions[contractName][version].audited, "Received audited must match");
-        assert.equal(receivedAuditHash, contractVersions[contractName][version].auditHash, "Received audit hash must match");
-        assert.equal(receivedAuditReportIPFSPointer, contractVersions[contractName][version].auditReportIPFSPointer, "Received audit report IPFS pointer must match");
-        assert.equal(recommended, false, "Version should not be recommended anymore");
 
     }); 
 

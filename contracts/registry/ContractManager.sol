@@ -40,11 +40,7 @@ contract ContractManager is Ownable {
         BugLevel bugLevel;// If any found
         address implementation;// The address of the version contract being referenced
         bool audited;// The boolean to mark whether the contract was audited or not
-        bytes32 auditHash;// bytes32 hash of the contract code
-        bytes auditReportIPFSPointer;// IPFS content address for the audit report
-        address auditor;// Address of the auditor
         uint256 dateAdded;// The date when this version was registered with the contract
-        bool recommended;// Whether this version is recommended or not
     }
 
     /** 
@@ -80,12 +76,6 @@ contract ContractManager is Ownable {
         _;
     }
 
-    modifier onlyAuditor(string contractName, string version) {
-        
-        require(msg.sender == contractVsVersions[contractName][version].auditor, "Non auditor called this method");
-        _;
-    }
-
     modifier doesContractExists(string contractName) {
         
         require(contractExists[contractName], "Contract does not exists");
@@ -104,9 +94,8 @@ contract ContractManager is Ownable {
     * @param version The version string
     * @param status Status of the version
     * @param _implementation The address of the version implementation
-    * @param _auditor The address of the auditor. It can be 0 address but in the case the version can never be marked as audited and hence can never become a recommended version
     */
-    function addVersion(string contractName, string version, Status status, address _implementation, address _auditor)external
+    function addVersion(string contractName, string version, Status status, address _implementation)external
      onlyOwner nonZeroAddress(_implementation){
 
         //can't pass empty string as version
@@ -133,12 +122,7 @@ contract ContractManager is Ownable {
             bugLevel:BugLevel.NONE,
             implementation:_implementation,
             audited:false,
-            auditHash:bytes32(0),
-            auditReportIPFSPointer:"",
-            auditor:_auditor,
-            dateAdded:block.timestamp,
-            recommended:false
-
+            dateAdded:block.timestamp
         });
 
         emit VersionAdded(contractName, version, _implementation);
@@ -155,9 +139,9 @@ contract ContractManager is Ownable {
          
         string storage recommendedVersion = contractVsRecommendedVersion[contractName];
         
-        //Recommended version can't be marked as deprecated
+        //if recommended version is being marked as DEPRECATED then it will removed from being recommended
         if(keccak256(abi.encodePacked(recommendedVersion)) == keccak256(abi.encodePacked(version)) && status == Status.DEPRECATED){
-            revert("Recommended version cannot be deprecated");
+            removeRecommendedVersion(contractName);
         }
 
         contractVsVersions[contractName][version].status = status;
@@ -190,25 +174,14 @@ contract ContractManager is Ownable {
     * @dev Mark version as audited
     * @param contractName Name of the contract
     * @param version Version of the contract
-    * @param auditHash Audit hash of the version
-    * @param auditReportIPFSPointer IPFS content address to the audit report
-    * Only auditor can call this method
     */
-    function markVersionAudited(string contractName, string version, bytes32 auditHash, bytes auditReportIPFSPointer)external
-     doesContractExists(contractName) versionExists(contractName, version) onlyAuditor(contractName, version){
-        
-        //audit hash should not be empty hash
-        require(auditHash != bytes32(0), "Audit hash is empty");
-
-        //audit report not passed
-        require(auditReportIPFSPointer.length>0, "IPFS content address for audit report not passed");
+    function markVersionAudited(string contractName, string version)external
+     doesContractExists(contractName) versionExists(contractName, version) onlyOwner{
         
         //Version should not be already audited
         require(!contractVsVersions[contractName][version].audited, "Version is already audited");
 
         contractVsVersions[contractName][version].audited = true;
-        contractVsVersions[contractName][version].auditHash = auditHash;
-        contractVsVersions[contractName][version].auditReportIPFSPointer = auditReportIPFSPointer;
 
         emit VersionAudited(contractName, version);
     }  
@@ -232,20 +205,8 @@ contract ContractManager is Ownable {
         //check version has bug level lower than HIGH
         require(contractVsVersions[contractName][version].bugLevel < BugLevel.HIGH, "Version bug level is not lower than HIGH");
 
-        string storage previousRecommendedVersionName = contractVsRecommendedVersion[contractName];
-
-        Version storage previousRecommendedVersion = contractVsVersions[contractName][previousRecommendedVersionName];
-
-        Version storage newRecommendedVersion = contractVsVersions[contractName][version];
-
-        //Mark previous as non-recommended
-        previousRecommendedVersion.recommended = false;
-
-        //Mark new version as recommened
-        newRecommendedVersion.recommended = true;
-
         //Put new version as recommended version for the contract
-        contractVsRecommendedVersion[contractName] = newRecommendedVersion.version;
+        contractVsRecommendedVersion[contractName] = version;
 
         emit VersionRecommended(contractName, version);
 
@@ -257,13 +218,6 @@ contract ContractManager is Ownable {
     */
     function removeRecommendedVersion(string contractName)public
      onlyOwner doesContractExists(contractName){
-
-        string storage versionName = contractVsRecommendedVersion[contractName];
-        
-        Version storage previousRecommendedVersion = contractVsVersions[contractName][versionName];
-
-        //Mark previous version as non-recommended
-        previousRecommendedVersion.recommended = false;
 
         //delete it from mapping
         delete contractVsRecommendedVersion[contractName];
@@ -277,7 +231,7 @@ contract ContractManager is Ownable {
     * @return Details of recommended version    
     */
     function getRecommendedVersion(string contractName)external view doesContractExists(contractName)
-     returns(string version, Status status, BugLevel bugLevel, address implementation,  address auditor, bool audited, bytes32 auditHash, bytes auditReportIPFSPointer, uint256 dateAdded, bool recommended){
+     returns(string version, Status status, BugLevel bugLevel, address implementation, bool audited, uint256 dateAdded){
 
         string storage versionName = contractVsRecommendedVersion[contractName];
 
@@ -288,11 +242,7 @@ contract ContractManager is Ownable {
         bugLevel = recommendedVersion.bugLevel;
         implementation = recommendedVersion.implementation;
         audited = recommendedVersion.audited;
-        auditHash = recommendedVersion.auditHash;
-        auditReportIPFSPointer = recommendedVersion.auditReportIPFSPointer;
         dateAdded = recommendedVersion.dateAdded;
-        auditor = recommendedVersion.auditor;
-        recommended = recommendedVersion.recommended;
     }
     
     /** 
@@ -333,7 +283,7 @@ contract ContractManager is Ownable {
     * @param version Version string for the contract
     */
     function getVersionDetails(string contractName, string versionName)external view
-     returns(string version, Status status, BugLevel bugLevel, address implementation,  address auditor, bool audited, bytes32 auditHash, bytes auditReportIPFSPointer, uint256 dateAdded, bool recommended){
+     returns(string version, Status status, BugLevel bugLevel, address implementation,  bool audited, uint256 dateAdded){
         
         Version storage v = contractVsVersions[contractName][versionName];
 
@@ -342,11 +292,6 @@ contract ContractManager is Ownable {
         bugLevel = v.bugLevel;
         implementation = v.implementation;
         audited = v.audited;
-        auditHash = v.auditHash;
-        auditReportIPFSPointer = v.auditReportIPFSPointer;
         dateAdded = v.dateAdded;
-        auditor = v.auditor;
-        recommended = v.recommended;
-
     }
 }
