@@ -1,5 +1,7 @@
 # OpenBazaar-SmartContracts
 
+<a href='https://coveralls.io/github/OpenBazaar/smart-contracts?branch=master'><img src='https://coveralls.io/repos/github/OpenBazaar/smart-contracts/badge.svg?branch=master' alt='Coverage Status' /></a>
+
 This repository contains all open bazaar smart contracts
 ## Getting Started
 
