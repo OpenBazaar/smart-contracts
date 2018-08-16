@@ -8,7 +8,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * @dev see https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC20Basic {
-    /// Total amount of tokens
+    // Total amount of tokens
     uint256 public totalSupply;
   
     function balanceOf(address _owner) public view returns (uint256 balance);
@@ -39,7 +39,7 @@ contract ERC20 is ERC20Basic {
 contract BasicToken is ERC20Basic {
     using SafeMath for uint256;
 
-  //balance in each address account
+    // balance in each address account
     mapping(address => uint256) balances;
 
   /**
@@ -151,7 +151,7 @@ contract TestToken is StandardToken {
         symbol = tokenSymbol;
         balances[msg.sender] = totalSupply;
          
-         //Emitting transfer event since assigning all tokens to the creator also corresponds to the transfer of tokens to the creator
+        // Emitting transfer event since assigning all tokens to the creator also corresponds to the transfer of tokens to the creator
         emit Transfer(address(0), msg.sender, totalSupply);
     }
 }
