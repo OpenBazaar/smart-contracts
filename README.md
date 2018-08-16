@@ -1,7 +1,6 @@
 # OpenBazaar-SmartContracts
-
-<a href='https://coveralls.io/github/OpenBazaar/smart-contracts?branch=master'><img src='https://coveralls.io/repos/github/OpenBazaar/smart-contracts/badge.svg?branch=master' alt='Coverage Status' /></a>
-
+[![Build Status](https://travis-ci.org/OpenBazaar/smart-contracts.svg?branch=master)](https://travis-ci.org/OpenBazaar/smart-contracts)
+[![Coverage Status](https://coveralls.io/repos/github/OpenBazaar/smart-contracts/badge.svg?branch=master)](https://coveralls.io/github/OpenBazaar/smart-contracts?branch=master)
 This repository contains all open bazaar smart contracts
 ## Getting Started
 
