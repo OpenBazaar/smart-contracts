@@ -37,7 +37,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedImplementation = txResult.logs[0].args.implementation;
 
         assert.equal(eventName, "VersionAdded", "VersionAdded event must be fired");
@@ -83,7 +83,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedImplementation = txResult.logs[0].args.implementation;
 
         assert.equal(eventName, "VersionAdded", "VersionAdded event must be fired");
@@ -190,7 +190,7 @@ contract("Contract Manager contract", function(accounts){
         
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
 
         assert.equal(eventName, "VersionAudited", "VersionAudited must be fired");
         assert.equal(receivedVersion, version, "Received version must match the passed one");
@@ -247,7 +247,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedStatus = txResult.logs[0].args.status;
 
         assert.equal(eventName, "StatusChanged", "StatusChanged must be fired");
@@ -273,7 +273,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -311,7 +311,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -336,7 +336,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
        
         assert.equal(eventName, "VersionRecommended", "VersionRecommended must be fired");
         assert.equal(receivedVersion, version, "Received version must match the passed one");
@@ -429,7 +429,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedStatus = txResult.logs[0].args.status;
 
         assert.equal(eventName, "StatusChanged", "StatusChanged must be fired");
@@ -454,7 +454,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedStatus = txResult.logs[0].args.status;
 
         assert.equal(eventName, "StatusChanged", "StatusChanged must be fired");
@@ -480,7 +480,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedStatus = txResult.logs[0].args.status;
 
         assert.equal(eventName, "StatusChanged", "StatusChanged must be fired");
@@ -505,7 +505,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -529,7 +529,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -555,7 +555,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -661,7 +661,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
         var receivedBugLevel = txResult.logs[0].args.bugLevel;
 
         assert.equal(eventName, "BugLevelChanged", "BugLevelChanged must be fired");
@@ -686,7 +686,7 @@ contract("Contract Manager contract", function(accounts){
 
         var eventName = txResult.logs[0].event;
         var receivedContractName = txResult.logs[0].args.contractName;
-        var receivedVersion = txResult.logs[0].args.version;
+        var receivedVersion = txResult.logs[0].args.versionName;
        
         assert.equal(eventName, "VersionRecommended", "VersionRecommended must be fired");
         assert.equal(receivedVersion, version, "Received version must match the passed one");

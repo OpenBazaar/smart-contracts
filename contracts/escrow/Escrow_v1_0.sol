@@ -33,7 +33,6 @@ contract Escrow_v1_0 {
         address[] moderators;
         uint256 value;
         Status status;
-        string ipfsHash;
         uint256 lastFunded;//Time at which transaction was last funded
         uint32 timeoutHours;
         uint8 threshold;
@@ -163,8 +162,6 @@ contract Escrow_v1_0 {
         
             status: Status.FUNDED,
                 
-            ipfsHash: "",
-
             lastFunded: block.timestamp,
 
             scriptHash: scriptHash,
@@ -267,12 +264,8 @@ contract Escrow_v1_0 {
 
         bool timeLockExpired = isTimeLockExpired(t.timeoutHours, t.lastFunded);
 
-        //assumin threshold will always be greater than 1, else its not multisig
-        if(sigV.length < t.threshold && !timeLockExpired){
-            revert();
-        }else if(sigV.length == 1 && timeLockExpired && lastRecovered != t.seller){
-            revert();
-        }else if(sigV.length < t.threshold){
+        //assuming threshold will always be greater than 1, else its not multisig
+        if(sigV.length < t.threshold && (!timeLockExpired || lastRecovered != t.seller)){
             revert();
         }
            
@@ -375,7 +368,7 @@ contract Escrow_v1_0 {
     function isTimeLockExpired(uint32 timeoutHours, uint256 lastFunded)internal view returns(bool expired){
         uint256 timeSince = now.sub(lastFunded);
 
-        expired = timeoutHours == 0?false:timeSince > uint256(timeoutHours).mul(3600);
+        expired = timeoutHours == 0?false:timeSince > uint256(timeoutHours).mul(3600000);
     }
 }
 

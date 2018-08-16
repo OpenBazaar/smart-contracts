@@ -16,6 +16,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
   let lw
   var repeatedScriptHash;
 
+  
   const getUniqueId = () => {
     var ripemd160stream = new RIPEMD160();
     var randomString = Math.floor((Math.random() * 100) + 1) + "" + Date.now();
@@ -67,7 +68,27 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
     return {sigV: sigV, sigR: sigR, sigS: sigS}
 
   }
-  
+
+  const increaseTime = async (milliseconds) => {
+    
+    await web3.currentProvider.send({
+        jsonrpc: '2.0', 
+        method: 'evm_increaseTime', 
+        params: [milliseconds], 
+        id: new Date().getTime()
+      }, (err, resp) => {
+          
+      });
+      
+      await web3.currentProvider.send({
+        jsonrpc: '2.0', 
+        method: 'evm_mine', 
+        params: [], 
+        id: new Date().getTime()
+      }, function(err, result){
+    });
+  }
+
   before((done) => {
     
     let seed = "dog permit example repeat gloom defy teach pumpkin library remain scorpion skull"
@@ -93,7 +114,7 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
                 this.escrow = await Escrow_v1_0.new({from:acct[0]});
                 this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
             
-
+               
                 done();
             })
         })
@@ -147,9 +168,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var receivedSeller = transaction[2];
         var receivedAmount = transaction[3];
         var receivedStatus = transaction[4];
-        var receivedTimeoutHours = transaction[7];
-        var receivedThreshold = transaction[8];
-        var receivedTransactionType = transaction[9];
+        var receivedTimeoutHours = transaction[6];
+        var receivedThreshold = transaction[7];
+        var receivedTransactionType = transaction[8];
 
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
@@ -764,6 +785,153 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         }
     });
 
+    it("Execute transaction after timeout by seller account", async()=>{
+
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = getUniqueId();
+        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var sellerBalanceBefore = await web3.eth.getBalance(seller);
+        var escrowContractBalanceBefore = await web3.eth.getBalance(this.escrow.address);
+
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
+
+        var sig = createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        
+        //simulate timeout
+        await increaseTime(6 * 60 * 60 * 1000 + 10000);
+
+        var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller], [amountToBeGivenToSeller]);
+
+        var eventName = txResult.logs[0].event;
+        var receivedScriptHash = txResult.logs[0].args.scriptHash;
+
+        assert.equal(eventName, "Executed", "Executed event must be fired");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+
+        var sellerBalanceAfter = await web3.eth.getBalance(seller);
+        var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
+
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
+
+        assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's ether balance must increase by : "+amountToBeGivenToSeller);
+        assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller)), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must reduce by escrowed amount");
+    });
+
+    it("Execute transaction after timeout by non-seller account", async()=>{
+
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = getUniqueId();
+        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = getScriptHash(redeemScript);
+        var amountToBeGivenToBuyer = web3.utils.toWei("1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+
+        var sig = createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+        
+        //simulate timeout
+        await increaseTime(6 * 60 * 60 * 1000 + 10000);
+
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [buyer], [amountToBeGivenToBuyer]);
+            assert.equal(true, false, "Should not be able to execute transaction after timeout by non-seller account");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
+    
+    });
+
+
+    it("Execute transaction before timeout by seller account", async()=>{
+
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = getUniqueId();
+        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+
+        var sig = createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        
+        //simulate timeout
+        await increaseTime(4 * 60 * 60 * 1000);
+        
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller], [amountToBeGivenToSeller]);
+            assert.equal(true, false, "Should not be able to execute transaction before timeout by seller account");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
+    
+    });
+
+    it("Execute Transaction with threshold as 1", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 1;
+        var timeoutHours = 6;
+        var uniqueId = getUniqueId();
+        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = getScriptHash(redeemScript);
+        var amountToBeGivenToBuyer = web3.utils.toWei("1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var buyerBalanceBefore = await web3.eth.getBalance(buyer);
+        var escrowContractBalanceBefore = await web3.eth.getBalance(this.escrow.address);
+
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+
+        var sig = createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+
+        var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [buyer], [amountToBeGivenToBuyer]);
+
+        var eventName = txResult.logs[0].event;
+        var receivedScriptHash = txResult.logs[0].args.scriptHash;
+
+        assert.equal(eventName, "Executed", "Executed event must be fired");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+
+        var buyerBalanceAfter = await web3.eth.getBalance(buyer);
+        var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
+
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
+
+        assert.isAtLeast(buyerBalanceBefore.plus(Number(amountToBeGivenToBuyer)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's ether balance must increase by : "+amountToBeGivenToBuyer);
+        assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToBuyer)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must reduce by escrowed amount");
+
+    });
+
+
     it("Add new Token transaction", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
@@ -812,10 +980,10 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var receivedSeller = transaction[2];
         var receivedAmount = transaction[3];
         var receivedStatus = transaction[4];
-        var receivedTimeoutHours = transaction[7];
-        var receivedThreshold = transaction[8];
-        var receivedTransactionType = transaction[9];
-        var receivedTokenAddress = transaction[10];
+        var receivedTimeoutHours = transaction[6];
+        var receivedThreshold = transaction[7];
+        var receivedTransactionType = transaction[8];
+        var receivedTokenAddress = transaction[9];
 
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
@@ -883,10 +1051,10 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var receivedSeller = transaction[2];
         var receivedAmount = transaction[3];
         var receivedStatus = transaction[4];
-        var receivedTimeoutHours = transaction[7];
-        var receivedThreshold = transaction[8];
-        var receivedTransactionType = transaction[9];
-        var receivedTokenAddress = transaction[10];
+        var receivedTimeoutHours = transaction[6];
+        var receivedThreshold = transaction[7];
+        var receivedTransactionType = transaction[8];
+        var receivedTokenAddress = transaction[9];
 
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");

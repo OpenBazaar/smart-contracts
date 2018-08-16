@@ -9,15 +9,15 @@ import "openzeppelin-solidity/contracts/AddressUtils.sol";
 contract ContractManager is Ownable {
 
 
-    event VersionAdded(string contractName, string version, address indexed implementation);
+    event VersionAdded(string contractName, string versionName, address indexed implementation);
 
-    event StatusChanged(string contractName, string version, Status status);
+    event StatusChanged(string contractName, string versionName, Status status);
 
-    event BugLevelChanged(string contractName, string version, BugLevel bugLevel);
+    event BugLevelChanged(string contractName, string versionName, BugLevel bugLevel);
 
-    event VersionAudited(string contractName, string version);
+    event VersionAudited(string contractName, string versionName);
 
-    event VersionRecommended(string contractName, string version);
+    event VersionRecommended(string contractName, string versionName);
 
     event RecommendedVersionRemoved(string contractName);
 
@@ -35,7 +35,7 @@ contract ContractManager is Ownable {
     * @dev The structure of the each version to be followed
     */
     struct Version {
-        string version;// the version number string v1.0
+        string versionName;// the version number string v1.0
         Status status;// Whether the version is BETA, RC OR PRODUCTION
         BugLevel bugLevel;// If any found
         address implementation;// The address of the version contract being referenced
@@ -56,7 +56,7 @@ contract ContractManager is Ownable {
     /** 
     * @dev Kepp track of all contract version
     */
-    mapping(string=>string[])internal contactVsVersionString;     
+    mapping(string=>string[])internal contractVsVersionString;     
 
 
     /** 
@@ -76,14 +76,14 @@ contract ContractManager is Ownable {
         _;
     }
 
-    modifier doesContractExists(string contractName) {
+    modifier contractRegistered(string contractName) {
         
         require(contractExists[contractName], "Contract does not exists");
         _;
     }
 
-    modifier versionExists(string contractName, string version) {
-        require(contractVsVersions[contractName][version].implementation != address(0), "Version does not exists for contract");
+    modifier versionExists(string contractName, string versionName) {
+        require(contractVsVersions[contractName][versionName].implementation != address(0), "Version does not exists for contract");
         _;
     }
 
@@ -91,15 +91,15 @@ contract ContractManager is Ownable {
     /** 
     * @dev Allow owner to add new version for the contract
     * @param contractName The contract name for which the version is to be added
-    * @param version The version string
+    * @param versionName The version string
     * @param status Status of the version
     * @param _implementation The address of the version implementation
     */
-    function addVersion(string contractName, string version, Status status, address _implementation)external
+    function addVersion(string contractName, string versionName, Status status, address _implementation)external
      onlyOwner nonZeroAddress(_implementation){
 
         //can't pass empty string as version
-        require(bytes(version).length>0, "Empty string passed as version");
+        require(bytes(versionName).length>0, "Empty string passed as version");
 
         //contract name can't be empty string
         require(bytes(contractName).length>0, "Empty string passed as contract name");
@@ -113,11 +113,11 @@ contract ContractManager is Ownable {
         }
 
         //check version should not already exist for the contract
-        require(contractVsVersions[contractName][version].implementation == address(0), "Version already exists for contract");
-        contactVsVersionString[contractName].push(version);
+        require(contractVsVersions[contractName][versionName].implementation == address(0), "Version already exists for contract");
+        contractVsVersionString[contractName].push(versionName);
 
-        contractVsVersions[contractName][version] = Version({
-            version:version,
+        contractVsVersions[contractName][versionName] = Version({
+            versionName:versionName,
             status:status,
             bugLevel:BugLevel.NONE,
             implementation:_implementation,
@@ -125,90 +125,90 @@ contract ContractManager is Ownable {
             dateAdded:block.timestamp
         });
 
-        emit VersionAdded(contractName, version, _implementation);
+        emit VersionAdded(contractName, versionName, _implementation);
     }
 
     /** 
     * @dev change status of the version
     * @param contractName Name of the contract
-    * @param version Version of the contract
+    * @param versionName Version of the contract
     * @param status Status to be set
     */
-    function changeStatus(string contractName, string version, Status status)external
-     onlyOwner doesContractExists(contractName) versionExists(contractName, version) {
+    function changeStatus(string contractName, string versionName, Status status)external
+     onlyOwner contractRegistered(contractName) versionExists(contractName, versionName) {
          
         string storage recommendedVersion = contractVsRecommendedVersion[contractName];
         
         //if recommended version is being marked as DEPRECATED then it will removed from being recommended
-        if(keccak256(abi.encodePacked(recommendedVersion)) == keccak256(abi.encodePacked(version)) && status == Status.DEPRECATED){
+        if(keccak256(abi.encodePacked(recommendedVersion)) == keccak256(abi.encodePacked(versionName)) && status == Status.DEPRECATED){
             removeRecommendedVersion(contractName);
         }
 
-        contractVsVersions[contractName][version].status = status;
+        contractVsVersions[contractName][versionName].status = status;
 
-        emit StatusChanged(contractName, version, status);
+        emit StatusChanged(contractName, versionName, status);
     }
 
     /** 
     * @dev Change the bug level for the contract
     * @param contractName Name of the contract
-    * @param version Version of the contract
+    * @param versionName Version of the contract
     * @param bugLevel New bug level for the contract
     */
-    function changeBugLevel(string contractName, string version, BugLevel bugLevel)external
-     onlyOwner doesContractExists(contractName) versionExists(contractName, version) {
+    function changeBugLevel(string contractName, string versionName, BugLevel bugLevel)external
+     onlyOwner contractRegistered(contractName) versionExists(contractName, versionName) {
 
         string storage recommendedVersion = contractVsRecommendedVersion[contractName];
 
         //if recommended version is being marked as critical then it will removed from being recommended
-        if(keccak256(abi.encodePacked(recommendedVersion)) == keccak256(abi.encodePacked(version)) && bugLevel == BugLevel.CRITICAL){
+        if(keccak256(abi.encodePacked(recommendedVersion)) == keccak256(abi.encodePacked(versionName)) && bugLevel == BugLevel.CRITICAL){
             removeRecommendedVersion(contractName);
         } 
 
-        contractVsVersions[contractName][version].bugLevel = bugLevel;
+        contractVsVersions[contractName][versionName].bugLevel = bugLevel;
 
-        emit BugLevelChanged(contractName, version, bugLevel);
+        emit BugLevelChanged(contractName, versionName, bugLevel);
     }
 
     /**
     * @dev Mark version as audited
     * @param contractName Name of the contract
-    * @param version Version of the contract
+    * @param versionName Version of the contract
     */
-    function markVersionAudited(string contractName, string version)external
-     doesContractExists(contractName) versionExists(contractName, version) onlyOwner{
+    function markVersionAudited(string contractName, string versionName)external
+     contractRegistered(contractName) versionExists(contractName, versionName) onlyOwner{
         
         //Version should not be already audited
-        require(!contractVsVersions[contractName][version].audited, "Version is already audited");
+        require(!contractVsVersions[contractName][versionName].audited, "Version is already audited");
 
-        contractVsVersions[contractName][version].audited = true;
+        contractVsVersions[contractName][versionName].audited = true;
 
-        emit VersionAudited(contractName, version);
+        emit VersionAudited(contractName, versionName);
     }  
 
     /** 
     * @dev Set recommended version
     * @param contractName Name of the contract
-    * @param version Version of the contract
+    * @param versionName Version of the contract
     * Version should be in Production stage and bug level should not be high or critical.
     * Version must be audited
     */
-    function markRecommendedVersion(string contractName, string version)external
-     onlyOwner doesContractExists(contractName) versionExists(contractName, version){
+    function markRecommendedVersion(string contractName, string versionName)external
+     onlyOwner contractRegistered(contractName) versionExists(contractName, versionName){
 
         //check version should be in production state
-        require(contractVsVersions[contractName][version].status == Status.PRODUCTION, "Version not in production state");
+        require(contractVsVersions[contractName][versionName].status == Status.PRODUCTION, "Version not in production state");
 
         //check version must be audited
-        require(contractVsVersions[contractName][version].audited, "Version is not audited");
+        require(contractVsVersions[contractName][versionName].audited, "Version is not audited");
 
         //check version has bug level lower than HIGH
-        require(contractVsVersions[contractName][version].bugLevel < BugLevel.HIGH, "Version bug level is not lower than HIGH");
+        require(contractVsVersions[contractName][versionName].bugLevel < BugLevel.HIGH, "Version bug level is not lower than HIGH");
 
         //Put new version as recommended version for the contract
-        contractVsRecommendedVersion[contractName] = version;
+        contractVsRecommendedVersion[contractName] = versionName;
 
-        emit VersionRecommended(contractName, version);
+        emit VersionRecommended(contractName, versionName);
 
     }
 
@@ -217,7 +217,7 @@ contract ContractManager is Ownable {
     * @param contractName Name of the contract
     */
     function removeRecommendedVersion(string contractName)public
-     onlyOwner doesContractExists(contractName){
+     onlyOwner contractRegistered(contractName){
 
         //delete it from mapping
         delete contractVsRecommendedVersion[contractName];
@@ -230,14 +230,13 @@ contract ContractManager is Ownable {
     * @dev Get recommended version for the contract.
     * @return Details of recommended version    
     */
-    function getRecommendedVersion(string contractName)external view doesContractExists(contractName)
-     returns(string version, Status status, BugLevel bugLevel, address implementation, bool audited, uint256 dateAdded){
+    function getRecommendedVersion(string contractName)external view contractRegistered(contractName)
+     returns(string versionName, Status status, BugLevel bugLevel, address implementation, bool audited, uint256 dateAdded){
 
-        string storage versionName = contractVsRecommendedVersion[contractName];
+        versionName = contractVsRecommendedVersion[contractName];
 
         Version storage recommendedVersion = contractVsVersions[contractName][versionName];
 
-        version = recommendedVersion.version;
         status = recommendedVersion.status;
         bugLevel = recommendedVersion.bugLevel;
         implementation = recommendedVersion.implementation;
@@ -257,7 +256,7 @@ contract ContractManager is Ownable {
     * @param contractName Name of the contract
     */
     function getVersionCountForContract(string contractName)external view returns(uint256 count){
-        count = contactVsVersionString[contractName].length;
+        count = contractVsVersionString[contractName].length;
     }
 
     /** 
@@ -273,21 +272,21 @@ contract ContractManager is Ownable {
     * @param contractName Name of the contract
     * @param index The index to be searched for
     */
-    function getVersionAtIndex(string contractName, uint256 index)external view returns(string version){
-        version = contactVsVersionString[contractName][index];
+    function getVersionAtIndex(string contractName, uint256 index)external view returns(string versionName){
+        versionName = contractVsVersionString[contractName][index];
     }
 
     /** 
     * @dev Returns the version details for the given contract and version
     * @param contractName Name of the contract
-    * @param version Version string for the contract
+    * @param versionName Version string for the contract
     */
     function getVersionDetails(string contractName, string versionName)external view
-     returns(string version, Status status, BugLevel bugLevel, address implementation,  bool audited, uint256 dateAdded){
+     returns(string versionString, Status status, BugLevel bugLevel, address implementation,  bool audited, uint256 dateAdded){
         
         Version storage v = contractVsVersions[contractName][versionName];
 
-        version = v.version;
+        versionString = v.versionName;
         status = v.status;
         bugLevel = v.bugLevel;
         implementation = v.implementation;
