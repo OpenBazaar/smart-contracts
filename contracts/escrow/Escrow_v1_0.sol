@@ -220,7 +220,7 @@ contract Escrow_v1_0 {
     *@dev Allows buyer of the transaction to add more funds(Tokens) in the transaction. This will help to cater scenarios wherein initially buyer missed to fund transaction as required
     *@param scriptHash script hash of the transaction
     */
-    function addTokensToTransaction(bytes32 scriptHash, uint256 value)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.TOKEN) onlyBuyer(scriptHash)payable{
+    function addTokensToTransaction(bytes32 scriptHash, uint256 value)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.TOKEN) onlyBuyer(scriptHash){
  
         uint256 _value = value;
     
