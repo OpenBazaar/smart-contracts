@@ -76,9 +76,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity 0.4.24;\npragma experimental \"v0.5.0\";\n\ninterface ITokenContract {\n    function balanceOf(address _owner) external view returns (uint256 balance);\n  \n    function transfer(address _to, uint256 _amount) external returns (bool success);\n\n    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool success);\n}",
-  "sourcePath": "/home/sameep/freelancing-projects/toptal/open baazar/publicRepo/smart-contracts/contracts/token/ITokenContract.sol",
+  "sourcePath": "/Users/austin/Documents/dev/ob/smart-contracts/contracts/token/ITokenContract.sol",
   "ast": {
-    "absolutePath": "/home/sameep/freelancing-projects/toptal/open baazar/publicRepo/smart-contracts/contracts/token/ITokenContract.sol",
+    "absolutePath": "/Users/austin/Documents/dev/ob/smart-contracts/contracts/token/ITokenContract.sol",
     "exportedSymbols": {
       "ITokenContract": [
         1170
@@ -454,7 +454,7 @@
     "src": "0:356:1"
   },
   "legacyAST": {
-    "absolutePath": "/home/sameep/freelancing-projects/toptal/open baazar/publicRepo/smart-contracts/contracts/token/ITokenContract.sol",
+    "absolutePath": "/Users/austin/Documents/dev/ob/smart-contracts/contracts/token/ITokenContract.sol",
     "exportedSymbols": {
       "ITokenContract": [
         1170
@@ -835,5 +835,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-09-03T13:51:38.754Z"
+  "updatedAt": "2018-09-05T19:00:04.555Z"
 }
