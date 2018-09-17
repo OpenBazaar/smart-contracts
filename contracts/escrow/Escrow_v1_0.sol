@@ -33,13 +33,14 @@ contract Escrow_v1_0 {
         address[] moderators;
         uint256 value;
         Status status;
-        uint256 lastFunded;//Time at which transaction was last funded
+        uint256 lastModified;//Time at which transaction was last modified
         uint32 timeoutHours;
         uint8 threshold;
         mapping(address=>bool) isOwner;//to keep track of owners/signers. 
         mapping(address=>bool) voted;//to keep track of who all voted
         TransactionType transactionType;
         address tokenAddress;// Token address in case of token transfer
+        mapping(address=>bool) beneficiaries;//Benefeciaries of transaction execution
 
     }
 
@@ -162,7 +163,7 @@ contract Escrow_v1_0 {
         
             status: Status.FUNDED,
                 
-            lastFunded: block.timestamp,
+            lastModified: block.timestamp,
 
             scriptHash: scriptHash,
 
@@ -203,14 +204,14 @@ contract Escrow_v1_0 {
     *@param scriptHash script hash of the transaction
     * Only buyer of the transaction can invoke this method
     */
-    function addFundsToTransaction(bytes32 scriptHash)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.ETHER) onlyBuyer(scriptHash) payable{
+    function addFundsToTransaction(bytes32 scriptHash)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.ETHER) onlyBuyer(scriptHash) payable {
  
         uint256 _value = msg.value;
     
         require(_value > 0);
 
         transactions[scriptHash].value = transactions[scriptHash].value.add(_value);
-        transactions[scriptHash].lastFunded = block.timestamp;
+        transactions[scriptHash].lastModified = block.timestamp;
 
 
         emit FundAdded(scriptHash, msg.sender, _value);
@@ -220,7 +221,7 @@ contract Escrow_v1_0 {
     *@dev Allows buyer of the transaction to add more funds(Tokens) in the transaction. This will help to cater scenarios wherein initially buyer missed to fund transaction as required
     *@param scriptHash script hash of the transaction
     */
-    function addTokensToTransaction(bytes32 scriptHash, uint256 value)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.TOKEN) onlyBuyer(scriptHash){
+    function addTokensToTransaction(bytes32 scriptHash, uint256 value)public transactionExists(scriptHash) inFundedState(scriptHash) checkTransactionType(scriptHash, TransactionType.TOKEN) onlyBuyer(scriptHash) {
  
         uint256 _value = value;
     
@@ -231,7 +232,7 @@ contract Escrow_v1_0 {
         require(token.transferFrom(transactions[scriptHash].buyer, this, value), "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer");
 
         transactions[scriptHash].value = transactions[scriptHash].value.add(_value);
-        transactions[scriptHash].lastFunded = block.timestamp;
+        transactions[scriptHash].lastModified = block.timestamp;
 
 
         emit FundAdded(scriptHash, msg.sender, _value);
@@ -262,7 +263,7 @@ contract Escrow_v1_0 {
 
         address lastRecovered = verifySignatures(sigV, sigR, sigS, scriptHash, destinations, amounts);
 
-        bool timeLockExpired = isTimeLockExpired(t.timeoutHours, t.lastFunded);
+        bool timeLockExpired = isTimeLockExpired(t.timeoutHours, t.lastModified);
 
         //assuming threshold will always be greater than 1, else its not multisig
         if(sigV.length < t.threshold && (!timeLockExpired || lastRecovered != t.seller)){
@@ -274,6 +275,7 @@ contract Escrow_v1_0 {
         uint256 totalValue = transferFunds(scriptHash, destinations, amounts);
         
         require(totalValue <= transactions[scriptHash].value, "Total value to be sent is greater than the transaction value");
+        transactions[scriptHash].lastModified = block.timestamp;//Last modified timestamp modified, which will be used by rewards
 
         emit Executed(scriptHash, destinations, amounts);       
     }
@@ -293,6 +295,7 @@ contract Escrow_v1_0 {
                 valueTransferred = valueTransferred.add(amounts[i]);
 
                 destinations[i].transfer(amounts[i]);//shall we use send instead of transfer to stop malicious actors from blocking funds?
+                t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
             }
             
         }else if(t.transactionType == TransactionType.TOKEN){
@@ -307,6 +310,8 @@ contract Escrow_v1_0 {
                 valueTransferred = valueTransferred.add(amounts[i]);
 
                 require(token.transfer(destinations[i], amounts[i]));
+                t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
+
             }
         }else{
             //transaction type is not supported. Ideally this state should never be reached
@@ -365,10 +370,29 @@ contract Escrow_v1_0 {
     }
 
 
-    function isTimeLockExpired(uint32 timeoutHours, uint256 lastFunded)internal view returns(bool expired){
-        uint256 timeSince = now.sub(lastFunded);
+    function isTimeLockExpired(uint32 timeoutHours, uint256 lastModified)internal view returns(bool expired){
+        uint256 timeSince = now.sub(lastModified);
 
         expired = timeoutHours == 0?false:timeSince > uint256(timeoutHours).mul(3600000);
     }
-}
 
+    /** 
+    * @dev Check whether given address was a beneficiary of transaction execution or not
+    * @param scriptHash script hash of the transaction
+    * @param beneficiary Beneficiary address to be checked
+    */
+    function checkBeneficiary(bytes32 scriptHash, address beneficiary)external view returns(bool check) {
+        check = transactions[scriptHash].beneficiaries[beneficiary];
+    }
+
+    /** 
+    * @dev Check whether given party has voted or not
+    * @param scriptHash script hash of the transaction
+    * @param party Address of the party whose vote has to be checked
+    * @return bool vote
+    */
+    function checkVote(bytes32 scriptHash, address party)external view returns(bool vote) {
+        vote = transactions[scriptHash].voted[party];
+    }
+
+}

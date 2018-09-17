@@ -2,133 +2,35 @@ var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
 var TestToken = artifacts.require("TestToken");
 
 var Web3 = require("web3");
-var lightwallet = require('eth-lightwallet')
-var leftPad = require('left-pad');
-var util = require("ethereumjs-util");
 var web3 = new Web3("http://localhost:8555");
-var RIPEMD160 = require('ripemd160');
 var BigNumber = require('bignumber.js');
+
+var helper = require("../helper.js");
 
 contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
-  let keyFromPw
-  let acct
-  let lw
+  let acct;
   var repeatedScriptHash;
 
-  
-  const getUniqueId = () => {
-    var ripemd160stream = new RIPEMD160();
-    var randomString = Math.floor((Math.random() * 100) + 1) + "" + Date.now();
-    ripemd160stream.end(randomString);
-    var id = ripemd160stream.read().toString('hex');
-    return "0x" + id;
-}
 
-  const generateRedeemScript = (uniqueId, threshold, timeoutHours, buyer, seller, moderator,multisigAddr, tokenAddress)=>{
-    let redeemScript = uniqueId + leftPad(threshold.toString(16), '2', '0') + leftPad(timeoutHours.toString(16), '8', '0') + buyer.slice(2) + seller.slice(2) + moderator.slice(2) + multisigAddr.slice(2) ;
-   
-    if(tokenAddress!=undefined){
-        redeemScript = redeemScript + tokenAddress.slice(2);
-    }
-
-    return redeemScript.toString('hex');
-}
-
-const getScriptHash = (redeemScript) => {
-    let hash = util.keccak256(redeemScript);
-    return "0x" + hash.toString('hex');
-}
-
-
-const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =>{
-
-    var dest= ""; 
-    var vals="" ;
-    for(var i = 0;i<destinationAddr.length;i++){
-        dest += leftPad(destinationAddr[i].slice(2),'64', '0');
-        vals += leftPad(Number(value[i]).toString('16'), '64', '0');
-    }
+  before(async() => {
     
-    let input = '0x19' + '00' + multisigAddr.slice(2) + dest + vals + scriptHash.slice(2);
+    acct = await helper.setupWallet();
 
-    let hash1 = util.keccak256(input);
-    let hash = util.hashPersonalMessage(util.toBuffer("0x" + hash1.toString("hex")));
-    let sigV = []
-    let sigR = []
-    let sigS = []
+    this.escrow = await Escrow_v1_0.new({from:acct[0]});
+    this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
+       
+});
 
-    for (var i=0; i<signers.length; i++) {
-      let sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signers[i])
-    
-      sigV.push(sig.v)
-      sigR.push('0x' + sig.r.toString('hex'))
-      sigS.push('0x' + sig.s.toString('hex'))
-    }
-    return {sigV: sigV, sigR: sigR, sigS: sigS}
-
-  }
-
-  const increaseTime = async (milliseconds) => {
-    
-    await web3.currentProvider.send({
-        jsonrpc: '2.0', 
-        method: 'evm_increaseTime', 
-        params: [milliseconds], 
-        id: new Date().getTime()
-      }, (err, resp) => {
-          
-      });
-      
-      await web3.currentProvider.send({
-        jsonrpc: '2.0', 
-        method: 'evm_mine', 
-        params: [], 
-        id: new Date().getTime()
-      }, function(err, result){
-    });
-  }
-
-  before((done) => {
-    
-    let seed = "dog permit example repeat gloom defy teach pumpkin library remain scorpion skull"
-
-    lightwallet.keystore.createVault(
-        {
-            hdPathString: "m/44'/60'/0'/0",
-            seedPhrase: seed,
-            password: "test",
-            salt: "testsalt"
-        },
-        function (err, keystore) {
-
-            lw = keystore
-            lw.keyFromPassword("test", async(e,k)=> {
-                keyFromPw = k
-
-                lw.generateNewAddress(keyFromPw, 10)
-                let acctWithout0x = lw.getAddresses()
-                acct = acctWithout0x.map((a) => {return a})
-                acct.sort()
-                
-                this.escrow = await Escrow_v1_0.new({from:acct[0]});
-                this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
-            
-               
-                done();
-            })
-        })
-    
-    });
     it("Add new transaction", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
         repeatedScriptHash = scriptHash;
@@ -188,9 +90,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
         var txResult = await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:amount});
@@ -237,9 +139,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");        
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:amount});
@@ -263,9 +165,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -285,9 +187,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("0", "ether");
 
        try{
@@ -307,9 +209,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 4;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -329,9 +231,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 0;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -351,9 +253,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = buyer;
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -373,9 +275,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -395,9 +297,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -417,9 +319,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = "0x";
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
 
        try{
@@ -458,9 +360,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
@@ -474,7 +376,7 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
         moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore);
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
@@ -504,13 +406,13 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
             assert.equal(true, false, "Should not be able to execute transaction with scripthash that does not exists in the contract");
@@ -527,15 +429,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
  
@@ -555,16 +457,16 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
-        uniqueId = getUniqueId();
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        uniqueId = helper.getUniqueId();
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -582,16 +484,16 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [web3.utils.toWei("0.8", "ether"), amountToBeGivenToModerator], scriptHash);
-        uniqueId = getUniqueId();
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [web3.utils.toWei("0.8", "ether"), amountToBeGivenToModerator], scriptHash);
+        uniqueId = helper.getUniqueId();
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -609,15 +511,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -635,15 +537,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, acct[4]], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, acct[4]], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -661,15 +563,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [acct[4], moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [acct[4], moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -687,15 +589,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -713,15 +615,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -739,15 +641,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -765,15 +667,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -792,9 +694,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
@@ -805,10 +707,10 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
-        var sig = createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
         
         //simulate timeout
-        await increaseTime(6 * 60 * 60 * 1000 + 10000);
+        await helper.increaseTime(6 * 60 * 60 * 1000 + 10000);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller], [amountToBeGivenToSeller]);
 
@@ -835,18 +737,18 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToBuyer = web3.utils.toWei("1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
 
-        var sig = createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+        var sig = helper.createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
         
         //simulate timeout
-        await increaseTime(6 * 60 * 60 * 1000 + 10000);
+        await helper.increaseTime(6 * 60 * 60 * 1000 + 10000);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [buyer], [amountToBeGivenToBuyer]);
@@ -867,18 +769,18 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
 
-        var sig = createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
         
         //simulate timeout
-        await increaseTime(4 * 60 * 60 * 1000);
+        await helper.increaseTime(4 * 60 * 60 * 1000);
         
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller], [amountToBeGivenToSeller]);
@@ -897,9 +799,9 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 1;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToBuyer = web3.utils.toWei("1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
@@ -910,7 +812,7 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
 
-        var sig = createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+        var sig = helper.createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [buyer], [amountToBeGivenToBuyer]);
 
@@ -938,7 +840,7 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
+        var uniqueId = helper.getUniqueId();
         var amount = web3.utils.toWei("100", "ether");
         var txResult = await this.token.approve(this.escrow.address, amount, {from:buyer});
 
@@ -948,8 +850,8 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
 
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         
         txResult = await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, amount, this.token.address, {from:acct[0]});
 
@@ -1004,14 +906,14 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
+        var uniqueId = helper.getUniqueId();
         var amount = web3.utils.toWei("100", "ether");
         var txResult = await this.token.approve(this.escrow.address, amount, {from:buyer});
 
        
 
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         
         txResult = await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, amount, this.token.address, {from:acct[0]});
 
@@ -1075,14 +977,14 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
+        var uniqueId = helper.getUniqueId();
         var amount = web3.utils.toWei("100", "ether");
         var txResult = await this.token.approve(this.escrow.address, amount, {from:buyer});
 
        
 
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         
         await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, amount, this.token.address, {from:acct[0]});
 
@@ -1104,11 +1006,11 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
+        var uniqueId = helper.getUniqueId();
         var amount = web3.utils.toWei("100", "ether");
 
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         
         try{
             await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, amount, this.token.address, {from:acct[0]});
@@ -1128,13 +1030,13 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 2;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
+        var uniqueId = helper.getUniqueId();
         var amount = web3.utils.toWei("100", "ether");
 
         await this.token.approve(this.escrow.address, web3.utils.toWei("10", "ether"), {from:buyer});
 
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         
         try{
             txResult = await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, amount, this.token.address, {from:acct[0]});
@@ -1154,16 +1056,16 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         var moderator = acct[2];
         var threshold = 3;
         var timeoutHours = 6;
-        var uniqueId = getUniqueId();
-        var redeemScript = generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
-        var scriptHash = getScriptHash(redeemScript);
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("90", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("10", "ether");
 
         var txResult = await this.token.approve(this.escrow.address, web3.utils.toWei("100", "ether"), {from:buyer});
         txResult = await this.escrow.addTokenTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash,web3.utils.toWei("100", "ether"), this.token.address, {from:acct[0]});
                 
-        var sig = createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
         
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
@@ -1193,6 +1095,59 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
         assert.equal(moderatorBalanceBefore.plus(Number(amountToBeGivenToModerator)).toNumber(), moderatorBalanceAfter.toNumber(), "Moderator's token balance must increase by : "+amountToBeGivenToModerator);
         assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller) + Number(amountToBeGivenToModerator)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must reduce by escrowed amount");
 
+    });
+
+    it("Check for valid beneficiaries", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var check = await this.escrow.checkBeneficiary(scriptHash, seller);
+        assert.equal(check, true, "Seller should be a valid beneficiary");
+
+
+        check = await this.escrow.checkBeneficiary(scriptHash, moderator);
+        assert.equal(check, true, "Moderator should be a valid beneficiary");
+        
+    });
+
+    it("Check for valid signers", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 2;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var sig = helper.createSigs([buyer, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var check = await this.escrow.checkVote(scriptHash, seller);
+        assert.equal(check, true, "Seller should be a valid signer");
+
+        check = await this.escrow.checkVote(scriptHash, moderator);
+        assert.equal(check, false, "Moderator should be not be a valid signer");
+        
     });
 
     
