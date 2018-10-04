@@ -59,12 +59,12 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
 
   }
 
-  const increaseTime = async (milliseconds) => {
+  const increaseTime = async (seconds) => {
     
     await web3.currentProvider.send({
         jsonrpc: '2.0', 
         method: 'evm_increaseTime', 
-        params: [milliseconds], 
+        params: [seconds], 
         id: new Date().getTime()
       }, (err, resp) => {
           

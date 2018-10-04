@@ -17,4 +17,5 @@ install:
 before_script:
   - truffle version
 script:
+  - npm run lint:sol
   - npm run coverage

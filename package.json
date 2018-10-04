@@ -29,14 +29,23 @@
     "solidity-coverage": "^0.5.5",
     "truffle": "^4.1.13",
     "web3": "^1.0.0-beta.34",
-    "yargs": "^11.0.0"
+    "yargs": "^11.0.0",
+    "solium": "^1.1.8",
+    "husky": "^1.1.0"
   },
   "scripts": {
     "test": "scripts/test.sh",
     "compile": "truffle compile",
     "migrate": "truffle migrate",
     "networks": "truffle networks",
-    "coverage": "scripts/coverage.sh"
+    "coverage": "scripts/coverage.sh",
+    "lint:sol": "solium -d .",
+    "lint:sol:fix": "solium -d . --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "truffle compile && npm run lint:sol:fix"
+    }
   },
   "repository": {
     "type": "git",
