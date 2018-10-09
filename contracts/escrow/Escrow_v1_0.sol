@@ -329,12 +329,17 @@ contract Escrow_v1_0 {
             destinations.length>0 && destinations.length == amounts.length, "Length of destinations is incorrect."
         );
 
-        bytes32 calculatedScriptHash = calculateRdeemScriptHash(
-            scriptHash, uniqueId
-        );
-
+        Transaction memory t = transactions[scriptHash];
         require(
-            scriptHash == calculatedScriptHash, 
+            scriptHash == calculateRedeemScriptHash(
+                uniqueId,
+                t.threshold,
+                t.timeoutHours,
+                t.buyer,
+                t.seller,
+                t.moderators[0],
+                t.tokenAddress
+            ), 
             "Calculated script hash does not match passed script hash."
         );
 
@@ -350,13 +355,63 @@ contract Escrow_v1_0 {
         transactions[scriptHash].status = Status.RELEASED;
 
         require(
-            transferFunds(scriptHash, destinations, amounts) <= transactions[scriptHash].value,
-            "Total value to be sent is greater than the transaction value"
+            transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
+            "Total value to be released must be equal to the transaction escrow value"
         );
         //Last modified timestamp modified, which will be used by rewards
         transactions[scriptHash].lastModified = block.timestamp;
 
         emit Executed(scriptHash, destinations, amounts);
+    }
+
+
+    /**
+    *@dev Method for calculating script hash. Calculation will depend upon the type of transaction
+    * ETHER Type transaction-:
+    * Script Hash- keccak256(uniqueId, threshold, timeoutHours, buyer, seller, moderator)
+    * TOKEN Type transaction
+    * Script Hash- keccak256(uniqueId, threshold, timeoutHours, buyer, seller, moderator, tokenAddress)
+    * Client can use this method to verify whether it has calculated correct script hash or not
+    */
+    function calculateRedeemScriptHash(
+        bytes20 uniqueId,
+        uint8 threshold,
+        uint32 timeoutHours,
+        address buyer,
+        address seller,
+        address moderator,
+        address tokenAddress
+    )
+        public
+        view
+        returns (bytes32 hash)
+    {
+        if (tokenAddress == address(0)) {
+            hash = keccak256(
+                abi.encodePacked(
+                    uniqueId,
+                    threshold,
+                    timeoutHours,
+                    buyer,
+                    seller,
+                    moderator,
+                    this
+                )
+            );
+        } else {
+            hash = keccak256(
+                abi.encodePacked(
+                    uniqueId,
+                    threshold,
+                    timeoutHours,
+                    buyer,
+                    seller,
+                    moderator,
+                    this,
+                    tokenAddress
+                )
+            );
+        }
     }
 
     /**
@@ -442,50 +497,6 @@ contract Escrow_v1_0 {
         } else {
             //transaction type is not supported. Ideally this state should never be reached
             revert("Transation type is not supported.");
-        }
-    }
-
-    /**
-    *@dev Private method for calculating script hash. Calculation will depend upon the type of transaction
-    * ETHER Type transaction-:
-    * Script Hash- keccak256(uniqueId, threshold, timeoutHours, buyer, seller, moderator)
-    * TOKEN Type transaction
-    * Script Hash- keccak256(uniqueId, threshold, timeoutHours, buyer, seller, moderator, tokenAddress)
-    */
-    function calculateRdeemScriptHash(
-        bytes32 scriptHash,
-        bytes20 uniqueId
-    )
-        private
-        view
-        returns (bytes32 hash)
-    {
-        Transaction storage t = transactions[scriptHash];
-        if (t.transactionType == TransactionType.ETHER) {
-            hash = keccak256(
-                abi.encodePacked(
-                    uniqueId,
-                    t.threshold,
-                    t.timeoutHours,
-                    t.buyer,
-                    t.seller,
-                    t.moderators[0],
-                    this
-                )
-            );
-        } else if (t.transactionType == TransactionType.TOKEN) {
-            hash = keccak256(
-                abi.encodePacked(
-                    uniqueId,
-                    t.threshold,
-                    t.timeoutHours,
-                    t.buyer,
-                    t.seller,
-                    t.moderators[0],
-                    this,
-                    t.tokenAddress
-                )
-            );
         }
     }
 

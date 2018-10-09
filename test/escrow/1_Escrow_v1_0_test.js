@@ -365,7 +365,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
-
+        
         await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
         var sellerBalanceBefore = await web3.eth.getBalance(seller);
@@ -602,6 +602,33 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
             assert.equal(true, false, "Should not be able to execute transaction with total value being sent greater than overall transaction value");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
+    });
+
+
+    it("Execute Transaction with total value being sent smaller than overall transaction value", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.8", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, uniqueId, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+            assert.equal(true, false, "Should not be able to execute transaction with total value being released smaller than overall transaction value");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
