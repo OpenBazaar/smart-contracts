@@ -143,6 +143,9 @@ contract Escrow_v1_0 {
             TransactionType.ETHER,
             address(0)
         );
+        
+        emit Funded(scriptHash, msg.sender, msg.value);
+
     }
 
     /**
@@ -179,12 +182,6 @@ contract Escrow_v1_0 {
         nonZeroAddress(seller)
         nonZeroAddress(tokenAddress)
     {
-        ITokenContract token = ITokenContract(tokenAddress);
-
-        require(
-            token.transferFrom(msg.sender, this, value),
-            "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer"
-        );
 
         _addTransaction(
             buyer,
@@ -198,6 +195,14 @@ contract Escrow_v1_0 {
             TransactionType.TOKEN,
             tokenAddress
         );
+
+        ITokenContract token = ITokenContract(tokenAddress);
+
+        require(
+            token.transferFrom(msg.sender, this, value),
+            "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer"
+        );
+        emit Funded(scriptHash, msg.sender, value);
     }
 
     /**
@@ -333,8 +338,6 @@ contract Escrow_v1_0 {
             destinations.length>0 && destinations.length == amounts.length, "Length of destinations is incorrect."
         );
 
-        Transaction memory t = transactions[scriptHash];
-
         verifyTransaction(
             sigV,
             sigR,
@@ -345,14 +348,13 @@ contract Escrow_v1_0 {
         );
 
         transactions[scriptHash].status = Status.RELEASED;
-
+        //Last modified timestamp modified, which will be used by rewards
+        transactions[scriptHash].lastModified = block.timestamp;
         require(
             transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
             "Total value to be released must be equal to the transaction escrow value"
         );
-        //Last modified timestamp modified, which will be used by rewards
-        transactions[scriptHash].lastModified = block.timestamp;
-
+        
         emit Executed(scriptHash, destinations, amounts);
     }
 
@@ -467,8 +469,8 @@ contract Escrow_v1_0 {
 
                 valueTransferred = valueTransferred.add(amounts[i]);
 
-                destinations[i].transfer(amounts[i]);//shall we use send instead of transfer to stop malicious actors from blocking funds?
                 t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
+                destinations[i].transfer(amounts[i]);//shall we use send instead of transfer to stop malicious actors from blocking funds?
             }
 
         } else if (t.transactionType == TransactionType.TOKEN) {
@@ -481,10 +483,9 @@ contract Escrow_v1_0 {
                 require(amounts[i] > 0, "Amount to be sent should be greater than 0");
 
                 valueTransferred = valueTransferred.add(amounts[i]);
-
-                require(token.transfer(destinations[i], amounts[i]), "Token transfer failed.");
                 t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
 
+                require(token.transfer(destinations[i], amounts[i]), "Token transfer failed.");
             }
         } else {
             //transaction type is not supported. Ideally this state should never be reached
@@ -579,13 +580,11 @@ contract Escrow_v1_0 {
         address tokenAddress
     )
         private
-    {
-        uint256 _value = value;
-        
+    {        
         require(buyer != seller, "Buyer and seller are same");
 
         //value passed should be greater than 0
-        require(_value>0, "Value passed is 0");
+        require(value>0, "Value passed is 0");
 
         // For now allowing 0 moderator to support 1-2 multisig wallet
         require(
@@ -605,12 +604,12 @@ contract Escrow_v1_0 {
             ), 
             "Calculated script hash does not match passed script hash."
         );
-        
+
         transactions[scriptHash] = Transaction({
             buyer: buyer,
             seller: seller,
             moderator: moderator,
-            value: _value,
+            value: value,
             status: Status.FUNDED,
             lastModified: block.timestamp,
             scriptHash: scriptHash,
@@ -636,7 +635,5 @@ contract Escrow_v1_0 {
 
         partyVsTransaction[buyer].push(scriptHash);
         partyVsTransaction[seller].push(scriptHash);
-
-        emit Funded(scriptHash, msg.sender, _value);
     }
 }
