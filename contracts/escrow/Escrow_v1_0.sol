@@ -1,5 +1,4 @@
 pragma solidity 0.4.24;
-pragma experimental "v0.5.0";
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -477,15 +476,15 @@ contract Escrow_v1_0 {
 
             ITokenContract token = ITokenContract(t.tokenAddress);
 
-            for (uint256 i = 0; i<destinations.length; i++) {
+            for (uint256 j = 0; j<destinations.length; j++) {
 
-                require(destinations[i] != address(0) && t.isOwner[destinations[i]], "Not a valid destination");
-                require(amounts[i] > 0, "Amount to be sent should be greater than 0");
+                require(destinations[j] != address(0) && t.isOwner[destinations[j]], "Not a valid destination");
+                require(amounts[j] > 0, "Amount to be sent should be greater than 0");
 
-                valueTransferred = valueTransferred.add(amounts[i]);
-                t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
+                valueTransferred = valueTransferred.add(amounts[j]);
+                t.beneficiaries[destinations[j]] = true;//add receiver as beneficiary
 
-                require(token.transfer(destinations[i], amounts[i]), "Token transfer failed.");
+                require(token.transfer(destinations[j], amounts[j]), "Token transfer failed.");
             }
         } else {
             //transaction type is not supported. Ideally this state should never be reached
@@ -637,3 +636,4 @@ contract Escrow_v1_0 {
         partyVsTransaction[seller].push(scriptHash);
     }
 }
+
