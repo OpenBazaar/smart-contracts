@@ -583,14 +583,18 @@ contract Escrow_v1_0 {
         require(buyer != seller, "Buyer and seller are same");
 
         //value passed should be greater than 0
-        require(value>0, "Value passed is 0");
+        require(value > 0, "Value passed is 0");
 
         // For now allowing 0 moderator to support 1-2 multisig wallet
         require(
             threshold > 0 && threshold <= 3, 
             "Threshold cannot be greater than 3 and must be greater than 0"
         );
-        require(moderator != address(0), "Pass valid moderator address");
+        require(
+            threshold == 1 || moderator != address(0),
+            "Either threshold should be 1 otherwise valid moderator address should be passed"
+        );
+
         require(
             scriptHash == calculateRedeemScriptHash(
                 uniqueId,
@@ -636,4 +640,3 @@ contract Escrow_v1_0 {
         partyVsTransaction[seller].push(scriptHash);
     }
 }
-
