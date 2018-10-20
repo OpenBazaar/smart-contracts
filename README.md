@@ -58,3 +58,7 @@ Test Coverage
 ```bash
 npm run coverage
 ```
+
+License
+-------------------
+Openbazaar smart contracts are released under the [MIT License](LICENSE).
