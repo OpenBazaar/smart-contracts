@@ -61,4 +61,4 @@ npm run coverage
 
 License
 -------------------
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more info.
+Openbazaar smart contracts are released under the [MIT License](LICENSE).
