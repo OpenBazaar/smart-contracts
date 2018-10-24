@@ -31,6 +31,7 @@
     "solium": "^1.1.8",
     "truffle": "^4.1.13",
     "web3": "^1.0.0-beta.34",
+    "websocket": "^1.0.28",
     "yargs": "^11.0.0"
   },
   "scripts": {
