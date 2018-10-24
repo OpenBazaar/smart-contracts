@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/AddressUtils.sol";
+import "openzeppelin-solidity/contracts/utils/Address.sol";
 
 
 /**
@@ -135,7 +135,7 @@ contract ContractManager is Ownable {
 
         //Check that the implementation corresponds to a contract address
         require(
-            AddressUtils.isContract(implementation), 
+            Address.isContract(implementation), 
             "Cannot set a implementation to a non-contract address"
         );
 
