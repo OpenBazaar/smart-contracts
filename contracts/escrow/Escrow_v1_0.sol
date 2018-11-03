@@ -590,6 +590,9 @@ contract Escrow_v1_0 {
             threshold > 0 && threshold <= 3, 
             "Threshold cannot be greater than 3 and must be greater than 0"
         );
+
+        //if threshold is 1 then moderator can be passed as zero address or any other address(it wont matter aopart from scripthash since we wont add moderator as one of the owner)
+        //otherwise moderator should be a valid address
         require(
             threshold == 1 || moderator != address(0),
             "Either threshold should be 1 otherwise valid moderator address should be passed"
@@ -631,7 +634,10 @@ contract Escrow_v1_0 {
             "Either buyer or seller is passed as moderator"
         );
 
-        transactions[scriptHash].isOwner[moderator] = true;
+        //set moderator as one of the owners only if threshold is greater than 1 otherwise only buyer and seller should be able to release funds
+        if (threshold > 1){
+            transactions[scriptHash].isOwner[moderator] = true;
+        }
        
 
         transactionCount++;
