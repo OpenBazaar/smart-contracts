@@ -7,8 +7,8 @@ import "../token/ITokenContract.sol";
 
 /**
 * @dev Supports ERC20 tokens
-* The escrow smart contract for the open bazaar trades in Ethereum
-* The smart contract is designed keeping in mind the current wallet interface of the OB-core
+* The escrow smart contract for the OpenBazaar trades in Ethereum
+* The smart contract is designed keeping in mind the current wallet interface of OB-core
 * https://github.com/OpenBazaar/wallet-interface/blob/master/wallet.go
 * Current wallet interface strictly adheres to UTXO(bitcoin) model
 * Please read below mentioned link for detailed specs
@@ -35,8 +35,8 @@ contract Escrow_v1_0 {
     );
 
     event Funded(
-        bytes32 indexed scriptHash, 
-        address indexed from, 
+        bytes32 indexed scriptHash,
+        address indexed from,
         uint256 value
     );
 
@@ -51,9 +51,9 @@ contract Escrow_v1_0 {
         address seller;
         address tokenAddress;//Token address in case of token transfer
         address moderator;
-        mapping(address=>bool) isOwner;//to keep track of owners.
-        mapping(address=>bool) voted;//to keep track of who all voted
-        mapping(address=>bool) beneficiaries;//Benefeciaries of execution
+        mapping(address => bool) isOwner;//to keep track of owners.
+        mapping(address => bool) voted;//to keep track of who all voted
+        mapping(address => bool) beneficiaries;//Benefeciaries of execution
     }
 
     mapping(bytes32 => Transaction) public transactions;
@@ -145,7 +145,7 @@ contract Escrow_v1_0 {
             TransactionType.ETHER,
             address(0)
         );
-        
+
         emit Funded(scriptHash, msg.sender, msg.value);
 
     }
@@ -239,7 +239,7 @@ contract Escrow_v1_0 {
     }
 
     /**
-    * @dev Allows buyer of the transaction to add more funds(ether) in the transaction. 
+    * @dev Allows buyer of the transaction to add more funds(ether) in the transaction.
     * This will help to cater scenarios wherein initially buyer missed to fund transaction as required
     * @param scriptHash script hash of the transaction
     * Only buyer of the transaction can invoke this method
@@ -253,7 +253,7 @@ contract Escrow_v1_0 {
         inFundedState(scriptHash)
         checkTransactionType(scriptHash, TransactionType.ETHER)
         onlyBuyer(scriptHash)
-        
+
     {
 
         require(msg.value > 0, "Value must be greater than zero.");
@@ -265,7 +265,7 @@ contract Escrow_v1_0 {
     }
 
     /**
-    * @dev Allows buyer of the transaction to add more funds(Tokens) in the transaction. 
+    * @dev Allows buyer of the transaction to add more funds(Tokens) in the transaction.
     * This will help to cater scenarios wherein initially buyer missed to fund transaction as required
     * @param scriptHash script hash of the transaction
     * Only buyer of the transaction can invoke this method
@@ -304,10 +304,10 @@ contract Escrow_v1_0 {
     */
     function getAllTransactionsForParty(
         address partyAddress
-    ) 
-        external 
-        view 
-        returns (bytes32[]) 
+    )
+        external
+        view
+        returns (bytes32[])
     {
         return partyVsTransaction[partyAddress];
     }
@@ -333,17 +333,17 @@ contract Escrow_v1_0 {
         external
         transactionExist(scriptHash)
         inFundedState(scriptHash)
-    {   
+    {
 
         require(
-            destinations.length>0, 
+            destinations.length > 0,
             "Number of destinations must be greater than 0"
         );
         require(
             destinations.length == amounts.length,
             "Number of destinations must match number of values sent"
         );
-       
+
         _verifyTransaction(
             sigV,
             sigR,
@@ -360,7 +360,7 @@ contract Escrow_v1_0 {
             _transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
             "Total value to be released must be equal to the transaction escrow value"
         );
-        
+
         emit Executed(scriptHash, destinations, amounts);
     }
 
@@ -503,7 +503,7 @@ contract Escrow_v1_0 {
 
                 require(token.transfer(destinations[j], amounts[j]), "Token transfer failed.");
             }
-        } 
+        }
         return valueTransferred;
     }
 
@@ -521,7 +521,7 @@ contract Escrow_v1_0 {
     {
 
         require(
-            sigR.length == sigS.length && sigR.length == sigV.length, 
+            sigR.length == sigS.length && sigR.length == sigV.length,
             "R,S,V length mismatch."
         );
 
@@ -552,11 +552,11 @@ contract Escrow_v1_0 {
             );
 
             require(
-                transactions[scriptHash].isOwner[recovered], 
+                transactions[scriptHash].isOwner[recovered],
                 "Invalid signature"
             );
             require(
-                !transactions[scriptHash].voted[recovered], 
+                !transactions[scriptHash].voted[recovered],
                 "Same signature sent twice"
             );
             transactions[scriptHash].voted[recovered] = true;
@@ -573,7 +573,7 @@ contract Escrow_v1_0 {
     {
         uint256 timeSince = now.sub(lastModified);
         return (
-            timeoutHours == 0 ? false:timeSince > uint256(timeoutHours).mul(3600)
+            timeoutHours == 0 ? false : timeSince > uint256(timeoutHours).mul(3600)
         );
     }
 
@@ -593,7 +593,7 @@ contract Escrow_v1_0 {
         address tokenAddress
     )
         private
-    {        
+    {
         require(buyer != seller, "Buyer and seller are same");
 
         //value passed should be greater than 0
@@ -601,7 +601,7 @@ contract Escrow_v1_0 {
 
         // For now allowing 0 moderator to support 1-2 multisig wallet
         require(
-            threshold > 0 && threshold <= 3, 
+            threshold > 0 && threshold <= 3,
             "Threshold cannot be greater than 3 and must be greater than 0"
         );
 
@@ -622,7 +622,7 @@ contract Escrow_v1_0 {
                 seller,
                 moderator,
                 tokenAddress
-            ), 
+            ),
             "Calculated script hash does not match passed script hash."
         );
 
@@ -640,11 +640,11 @@ contract Escrow_v1_0 {
         });
 
         transactions[scriptHash].isOwner[seller] = true;
-        transactions[scriptHash].isOwner[buyer] = true;            
+        transactions[scriptHash].isOwner[buyer] = true;
 
         //Check if buyer or seller are not passed as moderator
         require(
-            !transactions[scriptHash].isOwner[moderator], 
+            !transactions[scriptHash].isOwner[moderator],
             "Either buyer or seller is passed as moderator"
         );
 
@@ -652,7 +652,7 @@ contract Escrow_v1_0 {
         if (threshold > 1) {
             transactions[scriptHash].isOwner[moderator] = true;
         }
-       
+
 
         transactionCount++;
 
