@@ -333,11 +333,16 @@ contract Escrow_v1_0 {
         external
         transactionExist(scriptHash)
         inFundedState(scriptHash)
-    {
+    {   
         require(
-            destinations.length>0 && destinations.length == amounts.length, "Length of destinations is incorrect."
+            destinations.length>0, 
+            "Number of destinations must be greater than 0"
         );
-
+        require(
+            destinations.length == amounts.length,
+            "Number of destinations must match number of values sent"
+        );
+       
         _verifyTransaction(
             sigV,
             sigR,
@@ -466,7 +471,10 @@ contract Escrow_v1_0 {
         if (t.transactionType == TransactionType.ETHER) {
             for (uint256 i = 0; i < destinations.length; i++) {
 
-                require(destinations[i] != address(0) && t.isOwner[destinations[i]], "Not a valid destination");
+                require(destinations[i] != address(0), "zero address is not allowed as destination address");
+
+                require(t.isOwner[destinations[i]], "Destination address is not one of the owners");
+
                 require(amounts[i] > 0, "Amount to be sent should be greater than 0");
 
                 valueTransferred = valueTransferred.add(amounts[i]);
@@ -481,7 +489,10 @@ contract Escrow_v1_0 {
 
             for (uint256 j = 0; j<destinations.length; j++) {
 
-                require(destinations[j] != address(0) && t.isOwner[destinations[j]], "Not a valid destination");
+                require(destinations[j] != address(0), "zero address is not allowed as destination address");
+
+                require(t.isOwner[destinations[j]], "Destination address is not one of the owners");
+
                 require(amounts[j] > 0, "Amount to be sent should be greater than 0");
 
                 valueTransferred = valueTransferred.add(amounts[j]);
