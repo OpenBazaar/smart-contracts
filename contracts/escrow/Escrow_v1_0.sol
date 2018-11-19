@@ -21,19 +21,19 @@ contract Escrow_v1_0 {
     enum TransactionType {ETHER, TOKEN}
 
     event Executed(
-        bytes32 scriptHash,
+        bytes32 indexed scriptHash,
         address[] destinations,
         uint256[] amounts
     );
 
     event FundAdded(
-        bytes32 scriptHash,
+        bytes32 indexed scriptHash,
         address indexed from,
         uint256 valueAdded
     );
 
     event Funded(
-        bytes32 scriptHash, 
+        bytes32 indexed scriptHash, 
         address indexed from, 
         uint256 value
     );
