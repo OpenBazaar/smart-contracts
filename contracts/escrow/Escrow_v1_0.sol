@@ -444,16 +444,16 @@ contract Escrow_v1_0 {
             transactions[scriptHash].lastModified
         );
 
-        //if minimum number of signatures are not gathered and timelock has not expired or transaction was not signed by seller then revert
-        if (
-                sigV.length < transactions[scriptHash].threshold && (
-                    !timeLockExpired || !transactions[scriptHash].voted[transactions[scriptHash].seller]
-                )
-            )
-        {
-            revert("Minimum number of signatures are not collected and time lock expiry conditions not met!!");
+        //if the minimum number of signatures are not gathered and timelock has
+        //not expired or transaction was not signed by seller then revert
+        if (sigV.length < transactions[scriptHash].threshold) {
+            if (!timeLockExpired) {
+                revert("Min number of sigs not present and timelock not expired");
+            }
+            if (!transactions[scriptHash].voted[transactions[scriptHash].seller]) {
+                revert("Min number of sigs not present and seller did not sign");
+            }
         }
-
     }
 
     /**
