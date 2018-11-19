@@ -71,7 +71,7 @@ contract Escrow_v1_0 {
 
     modifier inFundedState(bytes32 scriptHash) {
         require(
-            transactions[scriptHash].status == Status.FUNDED, "Transaction is either in dispute or released state"
+            transactions[scriptHash].status == Status.FUNDED, "Transaction is not in FUNDED state"
         );
         _;
     }
