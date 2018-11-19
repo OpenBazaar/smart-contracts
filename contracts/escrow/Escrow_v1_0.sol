@@ -197,7 +197,7 @@ contract Escrow_v1_0 {
         ITokenContract token = ITokenContract(tokenAddress);
 
         require(
-            token.transferFrom(msg.sender, this, value),
+            token.transferFrom(msg.sender, address(this), value),
             "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of sender"
         );
         emit Funded(scriptHash, msg.sender, value);
@@ -287,7 +287,7 @@ contract Escrow_v1_0 {
         );
 
         require(
-            token.transferFrom(transactions[scriptHash].buyer, this, value),
+            token.transferFrom(transactions[scriptHash].buyer, address(this), value),
             "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer"
         );
 
@@ -389,7 +389,7 @@ contract Escrow_v1_0 {
                     buyer,
                     seller,
                     moderator,
-                    this
+                    address(this)
                 )
             );
         } else {
@@ -401,7 +401,7 @@ contract Escrow_v1_0 {
                     buyer,
                     seller,
                     moderator,
-                    this,
+                    address(this),
                     tokenAddress
                 )
             );
@@ -522,7 +522,7 @@ contract Escrow_v1_0 {
                     abi.encodePacked(
                         byte(0x19),
                         byte(0),
-                        this,
+                        address(this),
                         destinations,
                         amounts,
                         scriptHash
