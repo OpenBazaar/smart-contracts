@@ -1582,7 +1582,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
-            assert.equal(true, false, "Should not be able to execute transaction using moderators signature");
+            assert.equal(true, false, "Should not be able to execute transaction using moderator's signature");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
