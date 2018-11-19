@@ -59,7 +59,7 @@ contract Escrow_v1_0 {
     uint256 public transactionCount = 0;
 
     //Contains mapping between each party and all of their transactions
-    mapping(address => bytes32[]) public partyVsTransaction;
+    mapping(address => bytes32[]) private partyVsTransaction;
 
     modifier transactionExist(bytes32 scriptHash) {
         require(
@@ -338,7 +338,7 @@ contract Escrow_v1_0 {
             destinations.length>0 && destinations.length == amounts.length, "Length of destinations is incorrect."
         );
 
-        verifyTransaction(
+        _verifyTransaction(
             sigV,
             sigR,
             sigS,
@@ -351,7 +351,7 @@ contract Escrow_v1_0 {
         //Last modified timestamp modified, which will be used by rewards
         transactions[scriptHash].lastModified = block.timestamp;
         require(
-            transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
+            _transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
             "Total value to be released must be equal to the transaction escrow value"
         );
         
@@ -414,7 +414,7 @@ contract Escrow_v1_0 {
     * 2. Check if minimum number of signatures has been acquired
     * 3. If above condition is false, check if time lock is expired and the execution is signed by seller
     */
-    function verifyTransaction(
+    function _verifyTransaction(
         uint8[] sigV,
         bytes32[] sigR,
         bytes32[] sigS,
@@ -424,7 +424,7 @@ contract Escrow_v1_0 {
     )
         private
     {
-        address lastRecovered = verifySignatures(
+        address lastRecovered = _verifySignatures(
             sigV,
             sigR,
             sigS,
@@ -433,7 +433,7 @@ contract Escrow_v1_0 {
             amounts
         );
 
-        bool timeLockExpired = isTimeLockExpired(
+        bool timeLockExpired = _isTimeLockExpired(
             transactions[scriptHash].timeoutHours,
             transactions[scriptHash].lastModified
         );
@@ -451,7 +451,7 @@ contract Escrow_v1_0 {
     /**
     *@dev Private method to transfer funds to the destination addresses on the basis of transaction type
     */
-    function transferFunds(
+    function _transferFunds(
         bytes32 scriptHash,
         address[]destinations,
         uint256[]amounts
@@ -495,7 +495,7 @@ contract Escrow_v1_0 {
 
     //to check whether the signatures are valid or not and if consensus was reached
     //returns the last address recovered, in case of timeout this must be the sender's address
-    function verifySignatures(
+    function _verifySignatures(
         uint8[] sigV,
         bytes32[] sigR,
         bytes32[] sigS,
@@ -555,7 +555,7 @@ contract Escrow_v1_0 {
         return lastAddress;
     }
 
-    function isTimeLockExpired(
+    function _isTimeLockExpired(
         uint32 timeoutHours,
         uint256 lastModified
     )
