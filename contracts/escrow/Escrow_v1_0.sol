@@ -260,7 +260,6 @@ contract Escrow_v1_0 {
 
         transactions[scriptHash].value = transactions[scriptHash].value
             .add(msg.value);
-        transactions[scriptHash].lastModified = block.timestamp;
 
         emit FundAdded(scriptHash, msg.sender, msg.value);
     }
@@ -295,7 +294,6 @@ contract Escrow_v1_0 {
 
         transactions[scriptHash].value = transactions[scriptHash].value
             .add(value);
-        transactions[scriptHash].lastModified = block.timestamp;
 
         emit FundAdded(scriptHash, msg.sender, value);
     }
