@@ -486,10 +486,7 @@ contract Escrow_v1_0 {
 
                 require(token.transfer(destinations[j], amounts[j]), "Token transfer failed.");
             }
-        } else {
-            //transaction type is not supported. Ideally this state should never be reached
-            revert("Transation type is not supported.");
-        }
+        } 
     }
 
     //to check whether the signature are valid or not and if consensus was reached
