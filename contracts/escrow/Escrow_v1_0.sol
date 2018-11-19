@@ -42,18 +42,18 @@ contract Escrow_v1_0 {
 
     struct Transaction {
         uint256 value;
-        uint256 lastModified;//Time at which tx was last modified in seconds
+        uint256 lastModified; //time txn was last modified (in seconds)
         Status status;
         TransactionType transactionType;
         uint8 threshold;
         uint32 timeoutHours;
         address buyer;
         address seller;
-        address tokenAddress;//Token address in case of token transfer
+        address tokenAddress; //token address in case of token transfer
         address moderator;
-        mapping(address => bool) isOwner;//to keep track of owners.
-        mapping(address => bool) voted;//to keep track of who all voted
-        mapping(address => bool) beneficiaries;//Benefeciaries of execution
+        mapping(address => bool) isOwner; //to keep track of owners.
+        mapping(address => bool) voted; //to keep track of who all voted
+        mapping(address => bool) beneficiaries; //beneficiaries of execution
     }
 
     mapping(bytes32 => Transaction) public transactions;
@@ -63,7 +63,7 @@ contract Escrow_v1_0 {
     //Contains mapping between each party and all of their transactions
     mapping(address => bytes32[]) private partyVsTransaction;
 
-    modifier transactionExist(bytes32 scriptHash) {
+    modifier transactionExists(bytes32 scriptHash) {
         require(
             transactions[scriptHash].value != 0, "Transaction does not exist"
         );
@@ -71,7 +71,7 @@ contract Escrow_v1_0 {
     }
 
     modifier transactionDoesNotExist(bytes32 scriptHash) {
-        require(transactions[scriptHash].value == 0, "Transaction exist");
+        require(transactions[scriptHash].value == 0, "Transaction exists");
         _;
     }
 
@@ -249,7 +249,7 @@ contract Escrow_v1_0 {
     )
         external
         payable
-        transactionExist(scriptHash)
+        transactionExists(scriptHash)
         inFundedState(scriptHash)
         checkTransactionType(scriptHash, TransactionType.ETHER)
         onlyBuyer(scriptHash)
@@ -275,7 +275,7 @@ contract Escrow_v1_0 {
         uint256 value
     )
         external
-        transactionExist(scriptHash)
+        transactionExists(scriptHash)
         inFundedState(scriptHash)
         checkTransactionType(scriptHash, TransactionType.TOKEN)
         onlyBuyer(scriptHash)
@@ -289,7 +289,7 @@ contract Escrow_v1_0 {
 
         require(
             token.transferFrom(msg.sender, address(this), value),
-            "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer"
+            "Token transfer failed, maybe you did not approve the escrow contract to spend on behalf of the buyer"
         );
 
         transactions[scriptHash].value = transactions[scriptHash].value
@@ -331,7 +331,7 @@ contract Escrow_v1_0 {
         uint256[] amounts
     )
         external
-        transactionExist(scriptHash)
+        transactionExists(scriptHash)
         inFundedState(scriptHash)
     {
 
@@ -444,7 +444,7 @@ contract Escrow_v1_0 {
             transactions[scriptHash].lastModified
         );
 
-        //if Minimum number of signatures are not gathered and timelock has not expired or transaction was not signed by seller then revert
+        //if minimum number of signatures are not gathered and timelock has not expired or transaction was not signed by seller then revert
         if (
                 sigV.length < transactions[scriptHash].threshold && (
                     !timeLockExpired || !transactions[scriptHash].voted[transactions[scriptHash].seller]
@@ -482,7 +482,8 @@ contract Escrow_v1_0 {
 
                 valueTransferred = valueTransferred.add(amounts[i]);
 
-                t.beneficiaries[destinations[i]] = true;//add receiver as beneficiary
+                //add receiver as beneficiary
+                t.beneficiaries[destinations[i]] = true;
                 destinations[i].transfer(amounts[i]);
             }
 
@@ -499,7 +500,7 @@ contract Escrow_v1_0 {
                 require(amounts[j] > 0, "Amount to be sent should be greater than 0");
 
                 valueTransferred = valueTransferred.add(amounts[j]);
-                t.beneficiaries[destinations[j]] = true;//add receiver as beneficiary
+                t.beneficiaries[destinations[j]] = true; //add receiver as beneficiary
 
                 require(token.transfer(destinations[j], amounts[j]), "Token transfer failed.");
             }
@@ -507,8 +508,11 @@ contract Escrow_v1_0 {
         return valueTransferred;
     }
 
-    //to check whether the signatures are valid or not and if consensus was reached
-    //returns the last address recovered, in case of timeout this must be the sender's address
+
+    /**
+    *@dev Checks whether the signatures are valid or not and marks signers as
+    * having "voted".
+    */
     function _verifySignatures(
         uint8[] sigV,
         bytes32[] sigR,
