@@ -1640,7 +1640,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         assert.equal(check, true, "Seller should be a valid signer");
 
         check = await this.escrow.checkVote(scriptHash, moderator);
-        assert.equal(check, false, "Moderator should be not be a valid signer");
+        assert.equal(check, false, "Moderator should be not be a valid signer ");
         
     });    
 });
