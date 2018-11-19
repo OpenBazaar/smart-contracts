@@ -35,7 +35,6 @@ contract Escrow_v1_0 {
     event Funded(bytes32 scriptHash, address indexed from, uint256 value);
 
     struct Transaction {
-        bytes32 scriptHash;//This is unique indentifier for a transaction
         uint256 value;
         uint256 lastModified;//Time at which transaction was last modified
         Status status;
@@ -615,7 +614,6 @@ contract Escrow_v1_0 {
             value: value,
             status: Status.FUNDED,
             lastModified: block.timestamp,
-            scriptHash: scriptHash,
             threshold: threshold,
             timeoutHours: timeoutHours,
             transactionType:transactionType,

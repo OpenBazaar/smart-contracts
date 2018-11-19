@@ -65,16 +65,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -127,16 +125,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -189,16 +185,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -251,7 +245,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
        
-        var receivedAmount = transaction[1];
+        var receivedAmount = transaction[0];
        
         assert.equal(receivedAmount.toNumber(), Number(amount) +Number(amount), "Received amount does not matches the amount sent");
        
@@ -1137,17 +1131,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
-        var receivedTokenAddress = transaction[9];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
+        var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -1203,17 +1195,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
-        var receivedTokenAddress = transaction[9];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
+        var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -1269,17 +1259,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
 
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
-        var receivedTokenAddress = transaction[9];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
+        var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
@@ -1341,17 +1329,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         //check whether the transaction stored in state is same as sent
         var transaction = await this.escrow.transactions(scriptHash);
         
-        receivedScriptHash = transaction[0];
-        var receivedBuyer = transaction[7];
-        var receivedSeller = transaction[8];
-        var receivedAmount = transaction[1];
-        var receivedStatus = transaction[3];
-        var receivedTimeoutHours = transaction[6];
-        var receivedThreshold = transaction[5];
-        var receivedTransactionType = transaction[4];
-        var receivedTokenAddress = transaction[9];
+        var receivedBuyer = transaction[6];
+        var receivedSeller = transaction[7];
+        var receivedAmount = transaction[0];
+        var receivedStatus = transaction[2];
+        var receivedTimeoutHours = transaction[5];
+        var receivedThreshold = transaction[4];
+        var receivedTransactionType = transaction[3];
+        var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
         assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount) + Number(amount), "Received amount does not matches the amount sent");
