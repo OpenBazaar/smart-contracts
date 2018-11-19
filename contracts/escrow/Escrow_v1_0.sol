@@ -214,9 +214,9 @@ contract Escrow_v1_0 {
     )
         external
         view
-        returns (bool check)
+        returns (bool)
     {
-        check = transactions[scriptHash].beneficiaries[beneficiary];
+        return transactions[scriptHash].beneficiaries[beneficiary];
     }
 
     /**
@@ -231,9 +231,9 @@ contract Escrow_v1_0 {
     )
         external
         view
-        returns (bool vote)
+        returns (bool)
     {
-        vote = transactions[scriptHash].voted[party];
+        return transactions[scriptHash].voted[party];
     }
 
     /**
@@ -305,7 +305,7 @@ contract Escrow_v1_0 {
     ) 
         external 
         view 
-        returns (bytes32[] scriptHashes) 
+        returns (bytes32[]) 
     {
         return partyVsTransaction[partyAddress];
     }
@@ -376,10 +376,10 @@ contract Escrow_v1_0 {
     )
         public
         view
-        returns (bytes32 hash)
+        returns (bytes32)
     {
         if (tokenAddress == address(0)) {
-            hash = keccak256(
+            return keccak256(
                 abi.encodePacked(
                     uniqueId,
                     threshold,
@@ -391,7 +391,7 @@ contract Escrow_v1_0 {
                 )
             );
         } else {
-            hash = keccak256(
+            return keccak256(
                 abi.encodePacked(
                     uniqueId,
                     threshold,
@@ -455,9 +455,11 @@ contract Escrow_v1_0 {
         uint256[]amounts
     )
         private
-        returns (uint256 valueTransferred)
+        returns (uint256)
     {
         Transaction storage t = transactions[scriptHash];
+
+        uint256 valueTransferred = 0;
 
         if (t.transactionType == TransactionType.ETHER) {
             for (uint256 i = 0; i < destinations.length; i++) {
@@ -486,6 +488,7 @@ contract Escrow_v1_0 {
                 require(token.transfer(destinations[j], amounts[j]), "Token transfer failed.");
             }
         } 
+        return valueTransferred;
     }
 
     //to check whether the signature are valid or not and if consensus was reached
@@ -499,12 +502,15 @@ contract Escrow_v1_0 {
         uint256[]amounts
     )
         private
-        returns (address lastAddress)
+        returns (address)
     {
+
         require(
             sigR.length == sigS.length && sigR.length == sigV.length, 
             "R,S,V length mismatch."
         );
+
+        address lastAddress;
 
         // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
         bytes32 txHash = keccak256(
@@ -543,6 +549,8 @@ contract Escrow_v1_0 {
             transactions[scriptHash].voted[recovered] = true;
             lastAddress = recovered;
         }
+
+        return lastAddress;
     }
 
     function isTimeLockExpired(
@@ -551,10 +559,10 @@ contract Escrow_v1_0 {
     )
         private
         view
-        returns (bool expired)
+        returns (bool)
     {
         uint256 timeSince = now.sub(lastModified);
-        expired = (
+        return (
             timeoutHours == 0 ? false:timeSince > uint256(timeoutHours).mul(3600)
         );
     }

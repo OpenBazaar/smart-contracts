@@ -699,7 +699,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         
             assert.equal(true, false, "Should not be able to add transaction with wrong unique id");
 
-        }catch(error){
+        } catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
 
         }
