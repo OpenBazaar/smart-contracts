@@ -311,8 +311,8 @@ contract Escrow_v1_0 {
     }
 
     /**
-    *@dev Allows one of the moderator to collect all the signature to solve dispute and submit it to this method.
-    * If all the required signatures are collected and consensus has been reached than funds will be released to the voted party
+    *@dev This method will be used to release funds associated with the transaction
+    * Please see specs https://github.com/OpenBazaar/smart-contracts/blob/master/contracts/escrow/EscrowSpec.md
     *@param sigV Array containing V component of all the signatures
     *@param sigR Array containing R component of all the signatures
     *@param signS Array containing S component of all the signatures
