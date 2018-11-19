@@ -523,11 +523,8 @@ contract Escrow_v1_0 {
     )
         private
     {
-
-        require(
-            sigR.length == sigS.length && sigR.length == sigV.length,
-            "R,S,V length mismatch."
-        );
+        require(sigR.length == sigS.length, "R,S length mismatch");
+        require(sigR.length == sigV.length, "R,V length mismatch");
 
         // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
         bytes32 txHash = keccak256(
@@ -604,10 +601,8 @@ contract Escrow_v1_0 {
         require(value > 0, "Value passed is 0");
 
         // For now allowing 0 moderator to support 1-2 multisig wallet
-        require(
-            threshold > 0 && threshold <= 3,
-            "Threshold cannot be greater than 3 and must be greater than 0"
-        );
+        require(threshold > 0, "Threshold must be greater than 0");
+        require(threshold <= 3, "Threshold must not be greater than 3");
 
         //if threshold is 1 then moderator can be passed as zero address or any other address
         //(it won't matter apart from scripthash since we wont add moderator as one of the owner),
