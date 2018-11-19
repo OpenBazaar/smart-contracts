@@ -11,6 +11,8 @@ import "../token/ITokenContract.sol";
 * The smart contract is designed keeping in mind the current wallet interface of the OB-core
 * https://github.com/OpenBazaar/wallet-interface/blob/master/wallet.go
 * Current wallet interface strictly adheres to UTXO(bitcoin) model
+* Please read below mentioned link for detailed specs
+* https://github.com/OpenBazaar/smart-contracts/blob/master/contracts/escrow/EscrowSpec.md
 */
 contract Escrow_v1_0 {
 
