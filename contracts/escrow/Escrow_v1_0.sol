@@ -441,7 +441,7 @@ contract Escrow_v1_0 {
                 sigV.length < transactions[scriptHash].threshold && (!timeLockExpired || lastRecovered != transactions[scriptHash].seller)
             )
         {
-            revert("sigV.length is under the threshold.");
+            revert("Minimum number of signatures are not collected and time lock expiry conditions not met!!");
         }
 
     }
