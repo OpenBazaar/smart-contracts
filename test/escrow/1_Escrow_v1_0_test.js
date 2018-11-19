@@ -55,9 +55,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var amountEscrowed = txResult.logs[0].args.value;
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
-        assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(from, buyer, "Transaction was not sent from buyer's address: "+ buyer);
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.isAtLeast(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's ether balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must increase by escrowed amount: "+amount);
@@ -73,12 +73,12 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 0, "Received transaction type is not ETHER(0)");
     });
 
@@ -116,8 +116,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.isAtLeast(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's ether balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must increase by escrowed amount: "+amount);
@@ -133,12 +133,12 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 0, "Received transaction type is not ETHER(0)");
     });
 
@@ -176,8 +176,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.isAtLeast(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's ether balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must increase by escrowed amount: "+amount);
@@ -193,12 +193,12 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 0, "Received transaction type is not ETHER(0)");
     });
 
@@ -236,8 +236,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "FundAdded", "FundAdded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.isAtLeast(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's ether balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's ether balance must increase by escrowed amount: "+amount);
@@ -247,11 +247,11 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
        
         var receivedAmount = transaction[0];
        
-        assert.equal(receivedAmount.toNumber(), Number(amount) +Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount) +Number(amount), "Received amount does not match the amount sent");
        
     });
 
-    it("Add funds to ETHER transaction", async()=>{
+    it("Add funds to ETHER transaction from non-buyer account", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = acct[2];
@@ -321,7 +321,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
        
     });
 
-    it("Add new transaction with threshold greater number of parties involved", async()=>{
+    it("Add new transaction with threshold greater than number of parties involved", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = acct[2];
@@ -334,7 +334,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
        try{
             await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
-            assert.equal(true, false, "Should not be able to add transaction with threshold greater number of parties involved");
+            assert.equal(true, false, "Should not be able to add transaction with threshold greater than number of parties involved");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -365,7 +365,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
        
     });
 
-    it("Add new transaction with moderator being one of buyer or seller", async()=>{
+    it("Add new transaction with moderator being one of the buyer or seller", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = buyer;
@@ -422,7 +422,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
        try{
             await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
-            assert.equal(true, false, "Should not be able to add transaction with buyer being zero address");
+            assert.equal(true, false, "Should not be able to add transaction with seller being zero address");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -444,7 +444,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
        try{
             await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
-            assert.equal(true, false, "Should not be able to add transaction with buyer being zero address");
+            assert.equal(true, false, "Should not be able to add transaction with moderator being zero address");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -502,7 +502,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await web3.eth.getBalance(seller);
         var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
@@ -545,7 +545,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await web3.eth.getBalance(seller);
         var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
@@ -585,7 +585,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await web3.eth.getBalance(seller);
         var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
@@ -647,7 +647,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with scripthash that does not exists in the contract");
+            assert.equal(true, false, "Should not be able to execute transaction with scripthash that does not exist in the contract");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -776,7 +776,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with less number of signatures than required");
+            assert.equal(true, false, "Should not be able to execute transaction with non-owner's signature");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -802,7 +802,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with one of the destination being non-owner address");
+            assert.equal(true, false, "Should not be able to execute transaction with one of the destinations being non-owner address");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -933,7 +933,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with no destination");
+            assert.equal(true, false, "Should not be able to execute Transaction with number of destinations and amount in mismatch");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -972,7 +972,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await web3.eth.getBalance(seller);
         var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
@@ -1038,7 +1038,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
-            assert.equal(true, false, "Should not be able to execute transaction before timeout by seller account");
+            assert.equal(true, false, "Should not be able to execute transaction before timeout by seller account unilaterally");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -1074,7 +1074,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var buyerBalanceAfter = await web3.eth.getBalance(buyer);
         var escrowContractBalanceAfter = await web3.eth.getBalance(this.escrow.address);
@@ -1122,8 +1122,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.equal(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's token balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must increase by escrowed amount: "+amount);
@@ -1140,14 +1140,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 1, "Received transaction type is not TOKEN(1)");
-        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not matches the token address sent");
+        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not match the token address sent");
 
         
     });
@@ -1186,8 +1186,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.equal(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's token balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must increase by escrowed amount: "+amount);
@@ -1204,14 +1204,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 1, "Received transaction type is not TOKEN(1)");
-        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not matches the token address sent");
+        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not match the token address sent");
 
         
     });
@@ -1250,8 +1250,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.equal(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's token balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must increase by escrowed amount: "+amount);
@@ -1268,14 +1268,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 1, "Received transaction type is not TOKEN(1)");
-        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not matches the token address sent");
+        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not match the token address sent");
 
         
     });
@@ -1320,8 +1320,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(eventName, "FundAdded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash sent");
-        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not matches with the actual amount sent");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
+        assert.equal(amountEscrowed.toNumber(), Number(amount), "Escrowed amount does not match with the actual amount sent");
 
         assert.equal(buyerBalanceBefore.minus(Number(amount)).toNumber(), buyerBalanceAfter.toNumber(), "Buyer's token balance must reduce by escrowed amount: "+amount);
         assert.equal(escrowContractBalanceBefore.plus(Number(amount)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must increase by escrowed amount: "+amount);
@@ -1338,14 +1338,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
 
-        assert.equal(receivedBuyer, buyer, "Received buyer hash does not matches the buyer sent");
-        assert.equal(receivedSeller, seller, "Received seller hash does not matches the seller sent");
-        assert.equal(receivedAmount.toNumber(), Number(amount) + Number(amount), "Received amount does not matches the amount sent");
+        assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
+        assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
+        assert.equal(receivedAmount.toNumber(), Number(amount) + Number(amount), "Received amount does not match the amount sent");
         assert.equal(receivedStatus, 0, "Received status is not FUNDED(0)");
-        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not matches the timeout hours sent");
-        assert.equal(receivedThreshold, threshold, "Received threshold does not matches the threshold sent");
+        assert.equal(receivedTimeoutHours, timeoutHours, "Received timeout hours does not match the timeout hours sent");
+        assert.equal(receivedThreshold, threshold, "Received threshold does not match the threshold sent");
         assert.equal(receivedTransactionType, 1, "Received transaction type is not TOKEN(1)");
-        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not matches the token address sent");
+        assert.equal(receivedTokenAddress, this.token.address, "Received token address does not match the token address sent");
 
         
     });
@@ -1460,7 +1460,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
@@ -1504,7 +1504,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
@@ -1545,7 +1545,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
 
         assert.equal(eventName, "Executed", "Executed event must be fired");
-        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not matches the script hash of the transaction executed");
+        assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash of the transaction executed");
 
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);

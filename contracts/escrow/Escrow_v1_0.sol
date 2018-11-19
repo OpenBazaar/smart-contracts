@@ -42,7 +42,7 @@ contract Escrow_v1_0 {
 
     struct Transaction {
         uint256 value;
-        uint256 lastModified;//Time at which transaction was last modified
+        uint256 lastModified;//Time at which tx was last modified in seconds
         Status status;
         TransactionType transactionType;
         uint8 threshold;
