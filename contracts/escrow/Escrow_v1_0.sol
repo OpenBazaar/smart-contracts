@@ -288,7 +288,7 @@ contract Escrow_v1_0 {
         );
 
         require(
-            token.transferFrom(transactions[scriptHash].buyer, address(this), value),
+            token.transferFrom(msg.sender, address(this), value),
             "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of buyer"
         );
 
