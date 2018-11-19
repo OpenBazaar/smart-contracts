@@ -334,6 +334,7 @@ contract Escrow_v1_0 {
         transactionExist(scriptHash)
         inFundedState(scriptHash)
     {   
+        
         require(
             destinations.length>0, 
             "Number of destinations must be greater than 0"
