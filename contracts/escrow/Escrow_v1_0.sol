@@ -334,7 +334,7 @@ contract Escrow_v1_0 {
         transactionExist(scriptHash)
         inFundedState(scriptHash)
     {   
-        
+
         require(
             destinations.length>0, 
             "Number of destinations must be greater than 0"
@@ -430,7 +430,7 @@ contract Escrow_v1_0 {
     )
         private
     {
-        address lastRecovered = _verifySignatures(
+        _verifySignatures(
             sigV,
             sigR,
             sigS,
@@ -446,7 +446,9 @@ contract Escrow_v1_0 {
 
         //if Minimum number of signatures are not gathered and timelock has not expired or transaction was not signed by seller then revert
         if (
-                sigV.length < transactions[scriptHash].threshold && (!timeLockExpired || lastRecovered != transactions[scriptHash].seller)
+                sigV.length < transactions[scriptHash].threshold && (
+                    !timeLockExpired || !transactions[scriptHash].voted[transactions[scriptHash].seller]
+                )
             )
         {
             revert("Minimum number of signatures are not collected and time lock expiry conditions not met!!");
@@ -516,15 +518,12 @@ contract Escrow_v1_0 {
         uint256[]amounts
     )
         private
-        returns (address)
     {
 
         require(
             sigR.length == sigS.length && sigR.length == sigV.length, 
             "R,S,V length mismatch."
         );
-
-        address lastAddress;
 
         // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
         bytes32 txHash = keccak256(
@@ -561,10 +560,7 @@ contract Escrow_v1_0 {
                 "Same signature sent twice"
             );
             transactions[scriptHash].voted[recovered] = true;
-            lastAddress = recovered;
         }
-
-        return lastAddress;
     }
 
     function _isTimeLockExpired(
