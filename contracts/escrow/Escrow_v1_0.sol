@@ -253,15 +253,14 @@ contract Escrow_v1_0 {
         onlyBuyer(scriptHash)
         
     {
-        uint256 _value = msg.value;
 
-        require(_value > 0, "Value must be greater than zero.");
+        require(msg.value > 0, "Value must be greater than zero.");
 
         transactions[scriptHash].value = transactions[scriptHash].value
-            .add(_value);
+            .add(msg.value);
         transactions[scriptHash].lastModified = block.timestamp;
 
-        emit FundAdded(scriptHash, msg.sender, _value);
+        emit FundAdded(scriptHash, msg.sender, msg.value);
     }
 
     /**
@@ -280,9 +279,8 @@ contract Escrow_v1_0 {
         checkTransactionType(scriptHash, TransactionType.TOKEN)
         onlyBuyer(scriptHash)
     {
-        uint256 _value = value;
 
-        require(_value > 0, "Value must be greater than zero.");
+        require(value > 0, "Value must be greater than zero.");
 
         ITokenContract token = ITokenContract(
             transactions[scriptHash].tokenAddress
@@ -294,10 +292,10 @@ contract Escrow_v1_0 {
         );
 
         transactions[scriptHash].value = transactions[scriptHash].value
-            .add(_value);
+            .add(value);
         transactions[scriptHash].lastModified = block.timestamp;
 
-        emit FundAdded(scriptHash, msg.sender, _value);
+        emit FundAdded(scriptHash, msg.sender, value);
     }
 
     /**
