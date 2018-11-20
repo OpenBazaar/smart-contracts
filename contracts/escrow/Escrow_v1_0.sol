@@ -472,7 +472,7 @@ contract Escrow_v1_0 {
             if (!timeLockExpired) {
                 revert("Min number of sigs not present and timelock not expired");
             }
-            if (!transactions[scriptHash].voted[transactions[scriptHash].seller]) {
+            else if (!transactions[scriptHash].voted[transactions[scriptHash].seller]) {
                 revert("Min number of sigs not present and seller did not sign");
             }
         }
