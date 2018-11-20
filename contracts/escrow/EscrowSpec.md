@@ -36,11 +36,11 @@ The Escrow contract will store the escrowed funds and state information for _eve
 
 ### Funding the Trade
 
-Buyers initiate a trade by creating/storing a _Transaction_ struct in the Escrow contract and (simultaneously) funding the transaction by sending ETH (or ERC20 tokens) to the Escrow contract. At this point the transaction is in the _FUNDED_ state. While in the _FUNDED_ state, the buyer may add more ETH (or ERC20 tokens) to escrow if necessary.
+Buyers initiate a trade by creating/storing a _Transaction_ struct in the Escrow contract and (simultaneously) funding the transaction by sending ETH (or ERC20 tokens) to the Escrow contract. At this point the transaction is in the _FUNDED_ state. While in the _FUNDED_ state, the buyer may add more ETH (or ERC20 tokens) to escrow if necessary. Adding more funds to escrow _does not_ result in any changes to _timeoutHours_ (see next section).
 
 ### Releasing Funds from Escrow
 
-While the transaction is in the _FUNDED_ state, the escrowed funds can be released only if: (1) Two of the three participants (buyer, seller, and moderator) agree on how the escrowed funds are to be distributed, or (2) an amount of time (_timeoutHours_) has passed since the last time the buyer added funds to escrow.
+While the transaction is in the _FUNDED_ state, the escrowed funds can be released only if: (1) Two of the three participants (buyer, seller, and moderator) agree on how the escrowed funds are to be distributed, or (2) an amount of time (_timeoutHours_) has passed since the last time the buyer added funds to escrow. (Note: when _timeoutHours_ is set to 0, this indicates an infinite timeout, not an instantaneous timeout. In other words, if _timeoutHours_ is set to 0 then the seller can never unilaterally release funds from escrow.)
 
 The reasoning behind (2) is that it is very common for buyers to not release funds after they've received their goods (this is due more to buyer laziness than malice). In that event, we want to make it easy for the seller to claim the escrowed funds without having to coordinate with a moderator.
 
