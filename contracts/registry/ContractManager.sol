@@ -348,6 +348,15 @@ contract ContractManager is Ownable {
         implementation = recommendedVersion.implementation;
         audited = recommendedVersion.audited;
         timeAdded = recommendedVersion.timeAdded;
+
+        return (
+            versionName,
+            status,
+            bugLevel,
+            implementation,
+            audited,
+            timeAdded
+        );
     }
 
     /**
@@ -355,6 +364,7 @@ contract ContractManager is Ownable {
     */
     function getTotalContractCount() external view returns (uint256 count) {
         count = _contracts.length;
+        return count;
     }
 
     /**
@@ -367,6 +377,7 @@ contract ContractManager is Ownable {
         returns (uint256 count)
     {
         count = _contractVsVersionString[contractName].length;
+        return count;
     }
 
     /**
@@ -379,6 +390,7 @@ contract ContractManager is Ownable {
         returns (string contractName)
     {
         contractName = _contracts[index];
+        return contractName;
     }
 
     /**
@@ -392,6 +404,7 @@ contract ContractManager is Ownable {
         returns (string versionName)
     {
         versionName = _contractVsVersionString[contractName][index];
+        return versionName;
     }
 
     /**
@@ -419,6 +432,15 @@ contract ContractManager is Ownable {
         implementation = v.implementation;
         audited = v.audited;
         timeAdded = v.timeAdded;
+
+        return (
+            versionString,
+            status,
+            bugLevel,
+            implementation,
+            audited,
+            timeAdded
+        );
     }
 
     /**
