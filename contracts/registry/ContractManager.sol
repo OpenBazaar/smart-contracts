@@ -58,30 +58,30 @@ contract ContractManager is Ownable {
     /**
     * @dev List of all registered contracts
     */
-    string[] internal contracts;
+    string[] internal _contracts;
 
     /**
     * @dev To keep track of which contracts have been registered so far
     * to save gas while checking for redundant contracts
     */
-    mapping(string => bool) internal contractExists;
+    mapping(string => bool) internal _contractExists;
 
     /**
     * @dev To keep track of all versions of a given contract
     */
-    mapping(string => string[]) internal contractVsVersionString;
+    mapping(string => string[]) internal _contractVsVersionString;
 
 
     /**
     * @dev Mapping of contract name & version name to version struct
     */
-    mapping(string => mapping(string => Version)) internal  contractVsVersions;
+    mapping(string => mapping(string => Version)) internal _contractVsVersions;
 
     /**
     * @dev Mapping between contract name and the name of its recommended
     * version
     */
-    mapping(string => string) internal contractVsRecommendedVersion;
+    mapping(string => string) internal _contractVsRecommendedVersion;
 
 
     modifier nonZeroAddress(address _address){
@@ -91,13 +91,13 @@ contract ContractManager is Ownable {
 
     modifier contractRegistered(string contractName) {
 
-        require(contractExists[contractName], "Contract does not exists");
+        require(_contractExists[contractName], "Contract does not exists");
         _;
     }
 
     modifier versionExists(string contractName, string versionName) {
         require(
-            contractVsVersions[contractName][versionName].implementation != address(0),
+            _contractVsVersions[contractName][versionName].implementation != address(0),
             "Version does not exists for contract"
         );
         _;
@@ -141,19 +141,19 @@ contract ContractManager is Ownable {
 
         //version should not already exist for the contract
         require(
-            contractVsVersions[contractName][versionName].implementation == address(0),
+            _contractVsVersions[contractName][versionName].implementation == address(0),
             "This Version already exists for this contract"
         );
 
         //if this is a new contractName then push it to the contracts[] array
-        if (!contractExists[contractName]) {
-            contracts.push(contractName);
-            contractExists[contractName] = true;
+        if (!_contractExists[contractName]) {
+            _contracts.push(contractName);
+            _contractExists[contractName] = true;
         }
 
-        contractVsVersionString[contractName].push(versionName);
+        _contractVsVersionString[contractName].push(versionName);
 
-        contractVsVersions[contractName][versionName] = Version({
+        _contractVsVersions[contractName][versionName] = Version({
             versionName:versionName,
             status:status,
             bugLevel:BugLevel.NONE,
@@ -181,7 +181,7 @@ contract ContractManager is Ownable {
         contractRegistered(contractName)
         versionExists(contractName, versionName)
     {
-        string storage recommendedVersion = contractVsRecommendedVersion[
+        string storage recommendedVersion = _contractVsRecommendedVersion[
             contractName
         ];
 
@@ -202,7 +202,7 @@ contract ContractManager is Ownable {
             removeRecommendedVersion(contractName);
         }
 
-        contractVsVersions[contractName][versionName].status = status;
+        _contractVsVersions[contractName][versionName].status = status;
 
         emit StatusChanged(contractName, versionName, status);
     }
@@ -223,7 +223,7 @@ contract ContractManager is Ownable {
         contractRegistered(contractName)
         versionExists(contractName, versionName)
     {
-        string storage recommendedVersion = contractVsRecommendedVersion[
+        string storage recommendedVersion = _contractVsRecommendedVersion[
             contractName
         ];
 
@@ -245,7 +245,7 @@ contract ContractManager is Ownable {
             removeRecommendedVersion(contractName);
         }
 
-        contractVsVersions[contractName][versionName].bugLevel = bugLevel;
+        _contractVsVersions[contractName][versionName].bugLevel = bugLevel;
 
         emit BugLevelChanged(contractName, versionName, bugLevel);
     }
@@ -266,11 +266,11 @@ contract ContractManager is Ownable {
     {
         //this version should not already be marked audited
         require(
-            !contractVsVersions[contractName][versionName].audited,
+            !_contractVsVersions[contractName][versionName].audited,
             "Version is already audited"
         );
 
-        contractVsVersions[contractName][versionName].audited = true;
+        _contractVsVersions[contractName][versionName].audited = true;
 
         emit VersionAudited(contractName, versionName);
     }
@@ -294,24 +294,24 @@ contract ContractManager is Ownable {
     {
         //version must be in PRODUCTION state (status 2)
         require(
-            contractVsVersions[contractName][versionName].status == Status.PRODUCTION,
+            _contractVsVersions[contractName][versionName].status == Status.PRODUCTION,
             "Version is not in PRODUCTION state (status level should be 2)"
         );
 
         //check version must be audited
         require(
-            contractVsVersions[contractName][versionName].audited,
+            _contractVsVersions[contractName][versionName].audited,
             "Version is not audited"
         );
 
         //version must have bug level lower than HIGH
         require(
-            contractVsVersions[contractName][versionName].bugLevel < BugLevel.HIGH,
+            _contractVsVersions[contractName][versionName].bugLevel < BugLevel.HIGH,
             "Version bug level is HIGH or CRITICAL (bugLevel should be < 3)"
         );
 
         //mark new version as recommended version for the contract
-        contractVsRecommendedVersion[contractName] = versionName;
+        _contractVsRecommendedVersion[contractName] = versionName;
 
         emit VersionRecommended(contractName, versionName);
     }
@@ -335,9 +335,9 @@ contract ContractManager is Ownable {
             uint256 timeAdded
         )
     {
-        versionName = contractVsRecommendedVersion[contractName];
+        versionName = _contractVsRecommendedVersion[contractName];
 
-        Version storage recommendedVersion = contractVsVersions[
+        Version storage recommendedVersion = _contractVsVersions[
             contractName
         ][
             versionName
@@ -354,7 +354,7 @@ contract ContractManager is Ownable {
     * @dev Get the total number of contracts registered
     */
     function getTotalContractCount() external view returns (uint256 count) {
-        count = contracts.length;
+        count = _contracts.length;
     }
 
     /**
@@ -366,7 +366,7 @@ contract ContractManager is Ownable {
         view
         returns (uint256 count)
     {
-        count = contractVsVersionString[contractName].length;
+        count = _contractVsVersionString[contractName].length;
     }
 
     /**
@@ -378,7 +378,7 @@ contract ContractManager is Ownable {
         view
         returns (string contractName)
     {
-        contractName = contracts[index];
+        contractName = _contracts[index];
     }
 
     /**
@@ -391,7 +391,7 @@ contract ContractManager is Ownable {
         view
         returns (string versionName)
     {
-        versionName = contractVsVersionString[contractName][index];
+        versionName = _contractVsVersionString[contractName][index];
     }
 
     /**
@@ -411,7 +411,7 @@ contract ContractManager is Ownable {
             uint256 timeAdded
         )
     {
-        Version storage v = contractVsVersions[contractName][versionName];
+        Version storage v = _contractVsVersions[contractName][versionName];
 
         versionString = v.versionName;
         status = v.status;
@@ -432,7 +432,7 @@ contract ContractManager is Ownable {
         contractRegistered(contractName)
     {
         //delete it from mapping
-        delete contractVsRecommendedVersion[contractName];
+        delete _contractVsRecommendedVersion[contractName];
 
         emit RecommendedVersionRemoved(contractName);
     }
