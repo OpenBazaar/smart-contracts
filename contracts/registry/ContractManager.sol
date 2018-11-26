@@ -71,7 +71,6 @@ contract ContractManager is Ownable {
     */
     mapping(string => string[]) internal _contractVsVersionString;
 
-
     /**
     * @dev Mapping of contract name & version name to version struct
     */
@@ -82,7 +81,6 @@ contract ContractManager is Ownable {
     * version
     */
     mapping(string => string) internal _contractVsRecommendedVersion;
-
 
     modifier nonZeroAddress(address _address){
         require(_address != address(0), "The provided address is a 0 address");
