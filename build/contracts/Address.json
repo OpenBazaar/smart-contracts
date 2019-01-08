@@ -11,14 +11,14 @@
     "absolutePath": "openzeppelin-solidity/contracts/utils/Address.sol",
     "exportedSymbols": {
       "Address": [
-        2198
+        2007
       ]
     },
-    "id": 2199,
+    "id": 2008,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2181,
+        "id": 1990,
         "literals": [
           "solidity",
           "^",
@@ -34,16 +34,16 @@
         "contractKind": "library",
         "documentation": "Utility library of inline functions on addresses",
         "fullyImplemented": true,
-        "id": 2198,
+        "id": 2007,
         "linearizedBaseContracts": [
-          2198
+          2007
         ],
         "name": "Address",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2196,
+              "id": 2005,
               "nodeType": "Block",
               "src": "515:516:5",
               "statements": [
@@ -52,10 +52,10 @@
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2189,
+                      "id": 1998,
                       "name": "size",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2197,
+                      "scope": 2006,
                       "src": "521:12:5",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -64,7 +64,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2188,
+                        "id": 1997,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "521:7:5",
@@ -77,7 +77,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2190,
+                  "id": 1999,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
                   "src": "521:12:5"
@@ -86,7 +86,7 @@
                   "externalReferences": [
                     {
                       "size": {
-                        "declaration": 2189,
+                        "declaration": 1998,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "976:4:5",
@@ -95,7 +95,7 @@
                     },
                     {
                       "account": {
-                        "declaration": 2183,
+                        "declaration": 1992,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "996:7:5",
@@ -103,7 +103,7 @@
                       }
                     }
                   ],
-                  "id": 2191,
+                  "id": 2000,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    size := extcodesize(account)\n}",
                   "src": "965:52:5"
@@ -115,18 +115,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 2194,
+                    "id": 2003,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 2192,
+                      "id": 2001,
                       "name": "size",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2189,
+                      "referencedDeclaration": 1998,
                       "src": "1018:4:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -138,7 +138,7 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 2193,
+                      "id": 2002,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -159,15 +159,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2187,
-                  "id": 2195,
+                  "functionReturnParameters": 1996,
+                  "id": 2004,
                   "nodeType": "Return",
                   "src": "1011:15:5"
                 }
               ]
             },
             "documentation": "Returns whether the target address is a contract\n@dev This function will return false if invoked during the constructor of a contract,\nas the code is not actually created until after the constructor finishes.\n@param account address of the account to check\n@return whether the target address is a contract",
-            "id": 2197,
+            "id": 2006,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -175,15 +175,15 @@
             "name": "isContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2184,
+              "id": 1993,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2183,
+                  "id": 1992,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2197,
+                  "scope": 2006,
                   "src": "469:15:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -192,7 +192,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2182,
+                    "id": 1991,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "469:7:5",
@@ -209,15 +209,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 2187,
+              "id": 1996,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2186,
+                  "id": 1995,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2197,
+                  "scope": 2006,
                   "src": "509:4:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -226,7 +226,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2185,
+                    "id": 1994,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "509:4:5",
@@ -241,14 +241,14 @@
               ],
               "src": "508:6:5"
             },
-            "scope": 2198,
+            "scope": 2007,
             "src": "449:582:5",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 2199,
+        "scope": 2008,
         "src": "86:948:5"
       }
     ],
@@ -258,14 +258,14 @@
     "absolutePath": "openzeppelin-solidity/contracts/utils/Address.sol",
     "exportedSymbols": {
       "Address": [
-        2198
+        2007
       ]
     },
-    "id": 2199,
+    "id": 2008,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2181,
+        "id": 1990,
         "literals": [
           "solidity",
           "^",
@@ -281,16 +281,16 @@
         "contractKind": "library",
         "documentation": "Utility library of inline functions on addresses",
         "fullyImplemented": true,
-        "id": 2198,
+        "id": 2007,
         "linearizedBaseContracts": [
-          2198
+          2007
         ],
         "name": "Address",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2196,
+              "id": 2005,
               "nodeType": "Block",
               "src": "515:516:5",
               "statements": [
@@ -299,10 +299,10 @@
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 2189,
+                      "id": 1998,
                       "name": "size",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2197,
+                      "scope": 2006,
                       "src": "521:12:5",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -311,7 +311,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 2188,
+                        "id": 1997,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "521:7:5",
@@ -324,7 +324,7 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 2190,
+                  "id": 1999,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
                   "src": "521:12:5"
@@ -333,7 +333,7 @@
                   "externalReferences": [
                     {
                       "size": {
-                        "declaration": 2189,
+                        "declaration": 1998,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "976:4:5",
@@ -342,7 +342,7 @@
                     },
                     {
                       "account": {
-                        "declaration": 2183,
+                        "declaration": 1992,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "996:7:5",
@@ -350,7 +350,7 @@
                       }
                     }
                   ],
-                  "id": 2191,
+                  "id": 2000,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    size := extcodesize(account)\n}",
                   "src": "965:52:5"
@@ -362,18 +362,18 @@
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 2194,
+                    "id": 2003,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 2192,
+                      "id": 2001,
                       "name": "size",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2189,
+                      "referencedDeclaration": 1998,
                       "src": "1018:4:5",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -385,7 +385,7 @@
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 2193,
+                      "id": 2002,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -406,15 +406,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2187,
-                  "id": 2195,
+                  "functionReturnParameters": 1996,
+                  "id": 2004,
                   "nodeType": "Return",
                   "src": "1011:15:5"
                 }
               ]
             },
             "documentation": "Returns whether the target address is a contract\n@dev This function will return false if invoked during the constructor of a contract,\nas the code is not actually created until after the constructor finishes.\n@param account address of the account to check\n@return whether the target address is a contract",
-            "id": 2197,
+            "id": 2006,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -422,15 +422,15 @@
             "name": "isContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2184,
+              "id": 1993,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2183,
+                  "id": 1992,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2197,
+                  "scope": 2006,
                   "src": "469:15:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -439,7 +439,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2182,
+                    "id": 1991,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "469:7:5",
@@ -456,15 +456,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 2187,
+              "id": 1996,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2186,
+                  "id": 1995,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2197,
+                  "scope": 2006,
                   "src": "509:4:5",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -473,7 +473,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2185,
+                    "id": 1994,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "509:4:5",
@@ -488,14 +488,14 @@
               ],
               "src": "508:6:5"
             },
-            "scope": 2198,
+            "scope": 2007,
             "src": "449:582:5",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 2199,
+        "scope": 2008,
         "src": "86:948:5"
       }
     ],
@@ -507,5 +507,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2018-11-26T17:12:15.699Z"
+  "updatedAt": "2019-01-08T22:09:06.800Z"
 }
