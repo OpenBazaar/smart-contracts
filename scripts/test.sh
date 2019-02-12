@@ -27,9 +27,11 @@ start_ganache() {
  menomic_string="dog permit example repeat gloom defy teach pumpkin library remain scorpion skull"
 
   if [ "$SOLIDITY_COVERAGE" = true ]; then
-    node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffff --port "$ganache_port" -m "$menomic_string" -e 1000 > /dev/null &
+    echo "Running test rpc"
+    node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffff --port "$ganache_port" -m "$menomic_string" -e 1000 -a 100 > /dev/null &
   else
-    node_modules/.bin/ganache-cli --gasLimit 0xfffffffffff -m "$menomic_string" -e 1000 --p "$ganache_port" > /dev/null &
+    echo "Running Ganache"
+    node_modules/.bin/ganache-cli --gasLimit 0xfffffffffff -m "$menomic_string" -e 1000 -a 100 -p $ganache_port > /dev/null &
   fi
 
   ganache_pid=$!
@@ -37,9 +39,19 @@ start_ganache() {
 
 if ganache_running; then
   echo "Using existing ganache instance"
+  
 else
   echo "Starting our own ganache instance"
   start_ganache
+  
+  while :
+  do
+      if ganache_running 
+      then
+        break
+      fi  
+  done
+  echo "Ganache up and Running"
 fi
 
 if [ "$SOLC_NIGHTLY" = true ]; then

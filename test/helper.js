@@ -58,7 +58,15 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
     return {sigV: sigV, sigR: sigR, sigS: sigS}
 
   }
-
+const resetTime = async()=>{
+    await web3.currentProvider.send({
+        jsonrpc: '2.0', 
+        method: 'evm_mine', 
+        params: [new Date().getTime()/1000], 
+        id: new Date().getTime()
+      }, function(err, result){
+    });
+}
   const increaseTime = async (seconds) => {
     
     await web3.currentProvider.send({
@@ -98,7 +106,7 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
             lw.keyFromPassword("test", async(e,k)=> {
                 keyFromPw = k
 
-                lw.generateNewAddress(keyFromPw, 10)
+                lw.generateNewAddress(keyFromPw, 100)
                 let acctWithout0x = lw.getAddresses()
                 acct = acctWithout0x.map((a) => {return a})
                 acct.sort();
@@ -109,11 +117,19 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
     });
 
   };
+
+  const keccak256 = (data)=>{
+        let hash =  util.keccak256(data);
+        return "0x" + hash.toString('hex');
+  };
+
+
 module.exports = {
     getUniqueId,
     generateRedeemScript,
     getScriptHash,
     createSigs,
     increaseTime,
-    setupWallet
+    setupWallet,
+    keccak256
 };
