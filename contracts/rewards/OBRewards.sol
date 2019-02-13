@@ -468,19 +468,24 @@ contract OBRewards is Ownable {
                 lastModified
             );
 
-            if (rewardAmount == 0) {
-                emit UnsuccessfulClaim(scriptHashes[i], seller, buyer);
-                continue;
-            }
+            
 
             uint256 contractBalance = obToken.balanceOf(this);
 
             if (rewardAmount > contractBalance) {
-                rewardAmount = rewardAmount.sub(contractBalance);
+                rewardAmount = contractBalance;
             }
 
+            if (rewardAmount == 0) {
+                emit UnsuccessfulClaim(scriptHashes[i], seller, buyer);
+                continue;
+            }
+            
             //6. Update state
+            //edge case when multiple entries for same buyer can be made.
+            //But not an issue for us
             sellerVsBuyers[seller].push(buyer);
+            
             sellerVsBuyerRewards[seller][buyer] = Reward({
                 rewardAmount: rewardAmount,
                 scriptHash: scriptHashes[i]
