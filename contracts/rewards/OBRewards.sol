@@ -33,18 +33,13 @@ contract OBRewards is Ownable {
     //before X + timeWindow.
     uint256 public timeWindow;
 
-    struct Reward {
-        uint256 rewardAmount;
-        bytes32 scriptHash;
-    }
-
     //Mapping of seller versus all buyers who received rewards by purchasing
     //from that seller.
     mapping(address => address[]) sellerVsBuyers;
 
     //Given a seller and a buyer, this will return the amount of tokens that
     //have been rewarded to the buyer for purchasing from the seller.
-    mapping(address => mapping(address => Reward)) sellerVsBuyerRewards;
+    mapping(address => mapping(address => uint256)) sellerVsBuyerRewards;
 
     //For each seller, this returns the total number of tokens that have been
     //given out as rewards for purchasing from that seller.
@@ -219,7 +214,7 @@ contract OBRewards is Ownable {
     * @dev Return reward info for a buyer against a promoted seller
     * @param seller Address of promoted seller
     * @param buyer The buyer who reward info has to be fetched
-    * @return scriptHash, rewardAmount
+    * @return rewardAmount
     */
     function getBuyerRewardInfo(
         address seller,
@@ -228,17 +223,11 @@ contract OBRewards is Ownable {
         external
         view
         returns(
-            bytes32 scriptHash,
             uint256 rewardAmount
         )
     {
 
-        Reward storage reward = sellerVsBuyerRewards[seller][buyer];
-
-        scriptHash = reward.scriptHash;
-        rewardAmount = reward.rewardAmount;
-
-        return (scriptHash, rewardAmount);
+        return sellerVsBuyerRewards[seller][buyer];
     }
 
     /**
@@ -429,7 +418,10 @@ contract OBRewards is Ownable {
         );
 
         //2. Claim Reward
-        _claimReward(scriptHash);
+        bytes32[] memory scriptHashes = new bytes32[](1);
+        scriptHashes[0] = scriptHash;
+
+        claimRewards(scriptHashes);
     }
 
     /**
@@ -486,10 +478,12 @@ contract OBRewards is Ownable {
             //But not an issue for us
             sellerVsBuyers[seller].push(buyer);
             
-            sellerVsBuyerRewards[seller][buyer] = Reward({
-                rewardAmount: rewardAmount,
-                scriptHash: scriptHashes[i]
-            });
+            sellerVsBuyerRewards[seller][buyer] = sellerVsBuyerRewards[
+                seller
+            ][
+                buyer
+            ].add(rewardAmount);
+        
             sellerVsRewardsDistributed[seller] = sellerVsRewardsDistributed[
                 seller
             ].add(rewardAmount);
@@ -507,18 +501,6 @@ contract OBRewards is Ownable {
             );
         }
 
-    }
-
-    /**
-    * @dev Private helper function to claim reward for a single scriptHash
-    * @dev scriptHash Script hash of the transaction
-    */
-    function _claimReward(bytes32 scriptHash) private {
-
-        bytes32[] memory scriptHashes = new bytes32[](1);
-        scriptHashes[0] = scriptHash;
-
-        claimRewards(scriptHashes);
     }
 
     //Private method to get transaction info out from the escrow contract
@@ -670,7 +652,7 @@ contract OBRewards is Ownable {
             //maxRewardToBuyerPerSeller tokens will be given to each buyer per
             //seller until the maximum amount of rewards for the seller has
             //been exhausted
-            amount = maxRewardToBuyerPerSeller.sub(sellerVsBuyerRewards[seller][buyer].rewardAmount);
+            amount = maxRewardToBuyerPerSeller.sub(sellerVsBuyerRewards[seller][buyer]);
 
             //Check that we are not disbursing more rewards than are
             //allocated per seller
