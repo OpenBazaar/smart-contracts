@@ -399,7 +399,10 @@ contract OBRewards is Ownable {
 
     {
         //1. Execute transaction
-        escrowContract.execute( // this is a known and trusted contract
+        //SECURITY NOTE: `escrowContract` is a known and trusted contract, but
+        //the `execute` function transfers ETH or Tokens, and therefore hands
+        //over control of the logic flow to a potential attacker.
+        escrowContract.execute(
             sigV,
             sigR,
             sigS,
@@ -477,16 +480,16 @@ contract OBRewards is Ownable {
 
             totalTokensDistributed = totalTokensDistributed.add(rewardAmount);
 
-            //7. Transfer token
-            obToken.transfer(buyer, rewardAmount);
-
-            //8. Emit event
+            //7. Emit event
             emit SuccessfulClaim(
                 scriptHashes[i],
                 seller,
                 buyer,
                 rewardAmount
             );
+
+            //8. Transfer token
+            obToken.transfer(buyer, rewardAmount);
         }
 
     }
