@@ -6,9 +6,9 @@ OB1 will occasionally hold 'promotions' where users who buy goods from "promoted
 
 ## Time Limits
 
-When a buyer purchases from a promoted seller they become eligible to receive up to 50 OBT from the rewards contract. The buyer has a fixed amount of time (`_timeWindow` seconds) after the completion of the sale to claim their reward tokens from the contract.
+When a buyer purchases from a promoted seller they become eligible to receive up to 50 OBT from the rewards contract. The buyer has a fixed amount of time (`timeWindow` seconds) after the completion of the sale to claim their reward tokens from the contract.
 
-The promotion as a whole has an `endDate`, which is set (and changeble) by the owner. After the promotions `endDate` has come to pass, buyers can no longer claim any rewards.
+The promotion as a whole has an `endDate`, which is set (and changeble) by the owner. After the promotion's `endDate` has come to pass, buyers can no longer claim any rewards.
 
 ## Claiming Rewards
 
@@ -18,14 +18,16 @@ The buyer can claim tokens for which she is eligible in on of two ways:
 
 2.  By calling `executeAndClaim` the buyer can complete their trade with the seller and claim any rewards with a single transaction.
 
-# Limits on Reward Amounts
+## Limits on Reward Amounts
 
 Each buyer may be rewarded tokens for purchasing from a given promoted seller only once per promotion. That is, if buyer Bob buys from promoted seller Sally, he'll be eligible for up to 50 reward tokens, but if he buys from her again during the same promotion, he will not be eligible for an additional 50 reward tokens. If Bob wants to earn more tokens during the same promotion, he'd have to complete a purchase from some other promoted seller.
 
-Additionally, the owner of the contract sets a maximum total number of tokens that can be rewarded for purchasing from any given promoted seller (`_maxRewardPerSeller`).
+Additionally, the owner of the contract sets a maximum total number of tokens that can be rewarded for purchasing from any given promoted seller (`maxRewardPerSeller`). For example, suppose `maxRewardPerSeller` is 500 OBT and that each buyer is eligible to receive up to 50 OBT for purchasing from a given promoted seller. Then if Alice is a promoted seller, at most 10 buyers can receive rewards from purchasing from Alice.
 
 ## Additional Notes
 
 - Any reward tokens remaining in the contract can be withdrawn from the contract by the owner.
 
 - This approach to promoting sellers is subject to trivially-executable sybil attacks, as well as buyer collusion with promoted sellers. The limits on the rewards and the restriction to OB1-promoted sellers are intended to mitigate this risk.
+
+- If a buyer is eligible to receive more OBT than remains in the contract balance, then when the buyer attempts to claim their reward, the contract should pay out as much OBT as it can to the buyer. If the contract later receives more OBT, then the buyer should be able to claim the remainder of their reward.
