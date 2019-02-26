@@ -201,7 +201,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5374,
+                        "referencedDeclaration": 5339,
                         "src": "190:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -287,7 +287,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5374,
+                        "referencedDeclaration": 5339,
                         "src": "249:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -859,7 +859,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5374,
+                        "referencedDeclaration": 5339,
                         "src": "190:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -945,7 +945,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5374,
+                        "referencedDeclaration": 5339,
                         "src": "249:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1391,6 +1391,12 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2019-02-12T14:46:39.605Z"
+  "schemaVersion": "3.0.2",
+  "updatedAt": "2019-02-26T06:19:41.061Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

@@ -413,7 +413,7 @@
         "id": 1818,
         "nodeType": "ImportDirective",
         "scope": 2329,
-        "sourceUnit": 4797,
+        "sourceUnit": 4762,
         "src": "73:63:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -424,7 +424,7 @@
         "id": 1819,
         "nodeType": "ImportDirective",
         "scope": 2329,
-        "sourceUnit": 5360,
+        "sourceUnit": 5325,
         "src": "137:59:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -438,10 +438,10 @@
               "id": 1820,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4796,
+              "referencedDeclaration": 4761,
               "src": "296:7:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$4796",
+                "typeIdentifier": "t_contract$_Ownable_$4761",
                 "typeString": "contract Ownable"
               }
             },
@@ -451,7 +451,7 @@
           }
         ],
         "contractDependencies": [
-          4796
+          4761
         ],
         "contractKind": "contract",
         "documentation": "@dev Contract Version Manager for non-upgradeable contracts",
@@ -459,7 +459,7 @@
         "id": 2328,
         "linearizedBaseContracts": [
           2328,
-          4796
+          4761
         ],
         "name": "ContractManager",
         "nodeType": "ContractDefinition",
@@ -1394,10 +1394,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2236:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1553,10 +1553,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2426:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1830,10 +1830,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2589:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2079,10 +2079,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3392:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2249,10 +2249,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3527:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2311,10 +2311,10 @@
                             "name": "Address",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5359,
+                            "referencedDeclaration": 5324,
                             "src": "3715:7:4",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_Address_$5359_$",
+                              "typeIdentifier": "t_type$_t_contract$_Address_$5324_$",
                               "typeString": "type(library Address)"
                             }
                           },
@@ -2325,7 +2325,7 @@
                           "lValueRequested": false,
                           "memberName": "isContract",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 5358,
+                          "referencedDeclaration": 5323,
                           "src": "3715:18:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
@@ -2380,10 +2380,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3694:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2821,10 +2821,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "4082:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -3102,7 +3102,7 @@
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5364,
+                            "referencedDeclaration": 5329,
                             "src": "4537:5:4",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
@@ -3272,7 +3272,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "3276:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -3804,7 +3804,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "5068:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -4191,7 +4191,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "5751:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -5238,7 +5238,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "7266:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -6844,7 +6844,7 @@
         "id": 1818,
         "nodeType": "ImportDirective",
         "scope": 2329,
-        "sourceUnit": 4797,
+        "sourceUnit": 4762,
         "src": "73:63:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -6855,7 +6855,7 @@
         "id": 1819,
         "nodeType": "ImportDirective",
         "scope": 2329,
-        "sourceUnit": 5360,
+        "sourceUnit": 5325,
         "src": "137:59:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -6869,10 +6869,10 @@
               "id": 1820,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4796,
+              "referencedDeclaration": 4761,
               "src": "296:7:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$4796",
+                "typeIdentifier": "t_contract$_Ownable_$4761",
                 "typeString": "contract Ownable"
               }
             },
@@ -6882,7 +6882,7 @@
           }
         ],
         "contractDependencies": [
-          4796
+          4761
         ],
         "contractKind": "contract",
         "documentation": "@dev Contract Version Manager for non-upgradeable contracts",
@@ -6890,7 +6890,7 @@
         "id": 2328,
         "linearizedBaseContracts": [
           2328,
-          4796
+          4761
         ],
         "name": "ContractManager",
         "nodeType": "ContractDefinition",
@@ -7825,10 +7825,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2236:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -7984,10 +7984,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2426:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -8261,10 +8261,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "2589:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -8510,10 +8510,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3392:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -8680,10 +8680,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3527:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -8742,10 +8742,10 @@
                             "name": "Address",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5359,
+                            "referencedDeclaration": 5324,
                             "src": "3715:7:4",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_Address_$5359_$",
+                              "typeIdentifier": "t_type$_t_contract$_Address_$5324_$",
                               "typeString": "type(library Address)"
                             }
                           },
@@ -8756,7 +8756,7 @@
                           "lValueRequested": false,
                           "memberName": "isContract",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 5358,
+                          "referencedDeclaration": 5323,
                           "src": "3715:18:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
@@ -8811,10 +8811,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "3694:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -9252,10 +9252,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5377,
-                        5378
+                        5342,
+                        5343
                       ],
-                      "referencedDeclaration": 5378,
+                      "referencedDeclaration": 5343,
                       "src": "4082:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -9533,7 +9533,7 @@
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5364,
+                            "referencedDeclaration": 5329,
                             "src": "4537:5:4",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
@@ -9703,7 +9703,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "3276:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -10235,7 +10235,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "5068:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -10622,7 +10622,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "5751:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -11669,7 +11669,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4730,
+                  "referencedDeclaration": 4695,
                   "src": "7266:9:4",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -13254,6 +13254,96 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2019-02-12T14:46:39.610Z"
+  "schemaVersion": "3.0.2",
+  "updatedAt": "2019-02-26T06:19:41.068Z",
+  "devdoc": {
+    "methods": {
+      "addVersion(string,string,uint8,address)": {
+        "details": "Allows owner to register a new version of a contract",
+        "params": {
+          "contractName": "The contract name of the contract to be added",
+          "implementation": "The address of the implementation of the version",
+          "status": "Status of the version to be added",
+          "versionName": "The name of the version to be added"
+        }
+      },
+      "getContractAtIndex(uint256)": {
+        "details": "Returns the contract at a given index in the contracts array",
+        "params": {
+          "index": "The index to be searched for"
+        }
+      },
+      "getRecommendedVersion(string)": {
+        "details": "Get recommended version for the contract.",
+        "return": "Details of recommended version"
+      },
+      "getTotalContractCount()": {
+        "details": "Get total count of contracts registered"
+      },
+      "getVersionAtIndex(string,uint256)": {
+        "details": "Returns the version name of a contract at specific index in a contractVsVersionString[contractName] array",
+        "params": {
+          "contractName": "Name of the contract",
+          "index": "The index to be searched for"
+        }
+      },
+      "getVersionCountForContract(string)": {
+        "details": "Get total count of versions for the contract",
+        "params": {
+          "contractName": "Name of the contract"
+        }
+      },
+      "getVersionDetails(string,string)": {
+        "details": "Returns the version details for the given contract and version name",
+        "params": {
+          "contractName": "Name of the contract",
+          "versionName": "Version string for the contract"
+        }
+      },
+      "isOwner()": {
+        "return": "true if `msg.sender` is the owner of the contract."
+      },
+      "markRecommendedVersion(string,string)": {
+        "details": "Allows owner to set the recommended version",
+        "params": {
+          "contractName": "Name of the contract",
+          "versionName": "Version of the contract"
+        }
+      },
+      "owner()": {
+        "return": "the address of the owner."
+      },
+      "removeRecommendedVersion(string)": {
+        "details": "Allows owner to remove a version from being recommended",
+        "params": {
+          "contractName": "Name of the contract"
+        }
+      },
+      "renounceOwnership()": {
+        "details": "Allows the current owner to relinquish control of the contract."
+      },
+      "transferOwnership(address)": {
+        "details": "Allows the current owner to transfer control of the contract to a newOwner.",
+        "params": {
+          "newOwner": "The address to transfer ownership to."
+        }
+      },
+      "updateVersion(string,string,uint8,uint8)": {
+        "details": "Allows owner to update a contract version",
+        "params": {
+          "bugLevel": "New bug level for the contract",
+          "contractName": "Name of the contract",
+          "status": "Status of the contract",
+          "versionName": "Version of the contract"
+        }
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {
+      "renounceOwnership()": {
+        "notice": "Renouncing to ownership will leave the contract without an owner. It will not be possible to call the functions with the `onlyOwner` modifier anymore."
+      }
+    }
+  }
 }
