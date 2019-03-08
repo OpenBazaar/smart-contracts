@@ -4,6 +4,8 @@
 
 OpenBazaar facilitates trades between arbitrary third parties on the internet. Currently, only UTXO-based cryptocurrencies can be used as a medium of exchange on OpenBazaar. The escrow contract is intended to be used as a way to shoehorn Ethereum functionality into OpenBazaar's existing framework so that users can trade using ETH and ERC20 tokens as their medium of exchange.
 
+IMPORTANT: This contract supports only ETH and _compliant_ ERC20 tokens. Use of the Escrow contract with non-compliant ERC20 tokens may result in permanent loss of tokens. In particular, if the token does not return `true` upon a successful call to `token.transfer` or `token.transferFrom` you should not use the token with this escrow contract. See [this article](https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca) for a deeper explanation. We will never present non-complaint tokens as a payment option in the OpenBazaar UI, but it is still possible to send (and permanently lose) such tokens by interacting with the Escrow contract through a third-party UI.
+
 ### How OpenBazaar Trades Currently Work (in UTXO land)
 
 #### Moderated Payments
