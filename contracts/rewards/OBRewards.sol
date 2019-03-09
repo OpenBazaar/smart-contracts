@@ -237,7 +237,7 @@ contract OBRewards is Ownable {
     }
 
     /**
-    * @dev Method to allow the onwer to adjust the maximum reward per seller
+    * @dev Method to allow the owner to adjust the maximum reward per seller
     * @param _maxRewardPerSeller Max reward to be distributed for each seller
     */
     function changeMaxRewardPerSeller(
