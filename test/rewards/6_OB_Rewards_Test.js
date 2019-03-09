@@ -105,10 +105,8 @@ contract("OB Rewards Contract", function() {
         this.escrow = await Escrow_v1_0.new({from:acct[0]});
     
         this.OBT = await OBToken.new("Open Bazaar", "OBT", 18, 100000000, {from:acct[0]});
-        
-        var endDate = 0;
 
-        this.rewards = await OBRewards.new(500000000000000000000, 432000, this.escrow.address, this.OBT.address, endDate, {from:acct[0]});
+        this.rewards = await OBRewards.new(500000000000000000000, 432000, this.escrow.address, this.OBT.address, {from:acct[0]});
         await this.rewards.addPromotedSellers(promotedSellers, {from:acct[0]});
 
         await this.OBT.transfer(this.rewards.address, 570000000000000000000, {from:acct[0]});

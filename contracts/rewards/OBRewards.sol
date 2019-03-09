@@ -101,14 +101,12 @@ contract OBRewards is Ownable {
     * @param _escrowContractAddress Escrow address to be considered for
     * rewards distribution.
     * @param obTokenAddress Address of the reward token
-    * @param _endDate end date of the promotion
     */
     constructor(
         uint256 _maxRewardPerSeller,
         uint256 _timeWindow,
         address _escrowContractAddress, // this should be a trusted contract
-        address obTokenAddress,
-        uint256 _endDate
+        address obTokenAddress
     )
         public
         nonZeroAddress(_escrowContractAddress)
@@ -129,7 +127,6 @@ contract OBRewards is Ownable {
         timeWindow = _timeWindow;
         escrowContract = IEscrow(_escrowContractAddress);
         obToken = ITokenContract(obTokenAddress);
-        endDate = _endDate;
         maxRewardToBuyerPerSeller = uint256(50).mul(
             10 ** uint256(obToken.decimals())
         );
