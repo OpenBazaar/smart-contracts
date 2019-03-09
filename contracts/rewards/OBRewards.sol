@@ -94,7 +94,6 @@ contract OBRewards is Ownable {
 
     /**
     * @dev Add details to rewards contract at the time of deployment
-    * @param _promotedSellers List of promoted sellers
     * @param _maxRewardPerSeller Maximum reward to be distributed from
     * each seller
     * @param _timeWindow A time window, in seconds, where purchases
@@ -105,7 +104,6 @@ contract OBRewards is Ownable {
     * @param _endDate end date of the promotion
     */
     constructor(
-        address[] _promotedSellers,
         uint256 _maxRewardPerSeller,
         uint256 _timeWindow,
         address _escrowContractAddress, // this should be a trusted contract
@@ -116,10 +114,6 @@ contract OBRewards is Ownable {
         nonZeroAddress(_escrowContractAddress)
         nonZeroAddress(obTokenAddress)
     {
-        require(
-            _promotedSellers.length > 0,
-            "Please provide atleast 1 promoted seller"
-        );
 
         require(
             _maxRewardPerSeller > 0,
@@ -140,21 +134,6 @@ contract OBRewards is Ownable {
             10 ** uint256(obToken.decimals())
         );
 
-        for (uint256 i = 0; i < _promotedSellers.length; i++) {
-            require(
-                _promotedSellers[i] != address(0),
-                "Please provide valid address for promoted seller"
-            );
-
-            require(
-                !promotedSellers[_promotedSellers[i]],
-                "Same promoted seller provided twice"
-            );
-
-            promotedSellers[_promotedSellers[i]] = true;
-        }
-
-        emit PromotedSellersAdded(_promotedSellers);
     }
 
     /**
