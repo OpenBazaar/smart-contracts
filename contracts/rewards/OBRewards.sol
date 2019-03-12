@@ -33,9 +33,13 @@ contract OBRewards is Ownable {
     //before X + timeWindow.
     uint256 public timeWindow;
 
-    //Mapping of seller versus all buyers who received rewards by purchasing
+    //Mapping of seller to all buyers who received rewards by purchasing
     //from that seller.
-    mapping(address => address[]) sellerVsBuyers;
+    mapping(address => address[]) sellerVsBuyersArray;
+
+    //Mapping of seller and buyer to a bool indicating whether the buyers has
+    //claimed any rewards from that seller.
+    mapping(address => mapping(address => bool)) sellerVsBuyersBool;
 
     //Given a seller and a buyer, this will return the amount of tokens that
     //have been rewarded to the buyer for purchasing from the seller.
@@ -143,6 +147,10 @@ contract OBRewards is Ownable {
     function addPromotedSellers(address[] sellers) external onlyOwner {
 
         for (uint256 i = 0; i < sellers.length; i++) {
+            require(
+                sellers[i] != address(0),
+                "Zero address cannot be a promoted seller"
+            );
 
             require(
                 !promotedSellers[sellers[i]],
@@ -180,7 +188,7 @@ contract OBRewards is Ownable {
         view
         returns (address[] buyers)
     {
-        buyers = sellerVsBuyers[seller];
+        buyers = sellerVsBuyersArray[seller];
         return buyers;
     }
 
@@ -268,7 +276,7 @@ contract OBRewards is Ownable {
         view
         returns (uint256 size)
     {
-        size = sellerVsBuyers[seller].length;
+        size = sellerVsBuyersArray[seller].length;
         return size;
     }
 
@@ -286,10 +294,10 @@ contract OBRewards is Ownable {
         returns (address buyer)
     {
         require(
-            sellerVsBuyers[seller].length > index,
+            sellerVsBuyersArray[seller].length > index,
             "Array index out of bound"
         );
-        buyer = sellerVsBuyers[seller][index];
+        buyer = sellerVsBuyersArray[seller][index];
         return buyer;
     }
 
@@ -442,7 +450,10 @@ contract OBRewards is Ownable {
             }
 
             //6. Update state
-            sellerVsBuyers[seller].push(buyer);
+            if (!sellerVsBuyersBool[seller][buyer]) {
+                sellerVsBuyersBool[seller][buyer] = true;
+                sellerVsBuyersArray[seller].push(buyer);
+            }
 
             sellerVsBuyerRewards[seller][buyer] = sellerVsBuyerRewards[
                 seller
