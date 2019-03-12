@@ -94,7 +94,6 @@ contract OBRewards is Ownable {
 
     /**
     * @dev Add details to rewards contract at the time of deployment
-    * @param _promotedSellers List of promoted sellers
     * @param _maxRewardPerSeller Maximum reward to be distributed from
     * each seller
     * @param _timeWindow A time window, in seconds, where purchases
@@ -102,24 +101,17 @@ contract OBRewards is Ownable {
     * @param _escrowContractAddress Escrow address to be considered for
     * rewards distribution.
     * @param obTokenAddress Address of the reward token
-    * @param _endDate end date of the promotion
     */
     constructor(
-        address[] _promotedSellers,
         uint256 _maxRewardPerSeller,
         uint256 _timeWindow,
         address _escrowContractAddress, // this should be a trusted contract
-        address obTokenAddress,
-        uint256 _endDate
+        address obTokenAddress
     )
         public
         nonZeroAddress(_escrowContractAddress)
         nonZeroAddress(obTokenAddress)
     {
-        require(
-            _promotedSellers.length > 0,
-            "Please provide atleast 1 promoted seller"
-        );
 
         require(
             _maxRewardPerSeller > 0,
@@ -135,26 +127,10 @@ contract OBRewards is Ownable {
         timeWindow = _timeWindow;
         escrowContract = IEscrow(_escrowContractAddress);
         obToken = ITokenContract(obTokenAddress);
-        endDate = _endDate;
         maxRewardToBuyerPerSeller = uint256(50).mul(
             10 ** uint256(obToken.decimals())
         );
 
-        for (uint256 i = 0; i < _promotedSellers.length; i++) {
-            require(
-                _promotedSellers[i] != address(0),
-                "Please provide valid address for promoted seller"
-            );
-
-            require(
-                !promotedSellers[_promotedSellers[i]],
-                "Same promoted seller provided twice"
-            );
-
-            promotedSellers[_promotedSellers[i]] = true;
-        }
-
-        emit PromotedSellersAdded(_promotedSellers);
     }
 
     /**
@@ -261,7 +237,7 @@ contract OBRewards is Ownable {
     }
 
     /**
-    * @dev Method to allow the onwer to adjust the maximum reward per seller
+    * @dev Method to allow the owner to adjust the maximum reward per seller
     * @param _maxRewardPerSeller Max reward to be distributed for each seller
     */
     function changeMaxRewardPerSeller(
