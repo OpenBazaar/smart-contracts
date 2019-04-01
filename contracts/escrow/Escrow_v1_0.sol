@@ -52,8 +52,12 @@ contract Escrow_v1_0 {
         address seller;
         address tokenAddress; //token address in case of token transfer
         address moderator;
+        uint256 released;
+        uint256 noOfReleases;//Number of times execution took place
         mapping(address => bool) isOwner; //to keep track of owners.
-        mapping(address => bool) voted; //to keep track of who all voted
+        //to keep track of who all voted in latest transaction execution.
+        //This list will be refreshed with every execution
+        mapping(bytes32 => bool) voted;
         mapping(address => bool) beneficiaries; //beneficiaries of execution
     }
 
@@ -80,6 +84,14 @@ contract Escrow_v1_0 {
         require(
             transactions[scriptHash].status == Status.FUNDED,
             "Transaction is not in FUNDED state"
+        );
+        _;
+    }
+
+    modifier fundsExists(bytes32 scriptHash) {
+        require(
+            transactions[scriptHash].value.sub(transactions[scriptHash].released) > 0,
+            "All funds has been released"
         );
         _;
     }
@@ -245,8 +257,21 @@ contract Escrow_v1_0 {
         external
         view
         returns (bool)
-    {
-        return transactions[scriptHash].voted[party];
+    {   
+        bool voted = false;
+
+        for (uint256 i = 1; i<=transactions[scriptHash].noOfReleases; i++){
+
+            bytes32 addressHash = keccak256(abi.encodePacked(party, i));
+
+            if (transactions[scriptHash].voted[addressHash]){
+                voted = true;
+                break;
+            }
+        }
+
+        return voted;
+        
     }
 
     /**
@@ -348,7 +373,7 @@ contract Escrow_v1_0 {
     )
         external
         transactionExists(scriptHash)
-        inFundedState(scriptHash)
+        fundsExists(scriptHash)
     {
 
         require(
@@ -372,14 +397,20 @@ contract Escrow_v1_0 {
         transactions[scriptHash].status = Status.RELEASED;
         //Last modified timestamp modified, which will be used by rewards
         transactions[scriptHash].lastModified = block.timestamp;
+
+        transactions[scriptHash].released = _transferFunds(
+            scriptHash, 
+            destinations, 
+            amounts
+        ).add(transactions[scriptHash].released);
+        
         require(
-            _transferFunds(scriptHash, destinations, amounts) == transactions[scriptHash].value,
-            "Total value to be released must be equal to the transaction escrow value"
+            transactions[scriptHash].value >= transactions[scriptHash].released, 
+            "Value of transacation should be greater than released value"
         );
 
         emit Executed(scriptHash, destinations, amounts);
     }
-
 
     /**
     *@dev Method for calculating script hash. Calculation will depend upon
@@ -472,7 +503,15 @@ contract Escrow_v1_0 {
             if (!timeLockExpired) {
                 revert("Min number of sigs not present and timelock not expired");
             }
-            else if (!transactions[scriptHash].voted[transactions[scriptHash].seller]) {
+            else if (
+                !transactions[scriptHash].voted[keccak256(
+                    abi.encodePacked(
+                        transactions[scriptHash].seller, 
+                        transactions[scriptHash].noOfReleases
+                    )
+                )]
+            ) 
+            {
                 revert("Min number of sigs not present and seller did not sign");
             }
         }
@@ -588,6 +627,9 @@ contract Escrow_v1_0 {
                 )
             )
         );
+        //Increment release conuter
+        transactions[scriptHash].noOfReleases = transactions[scriptHash].
+            noOfReleases.add(1);
 
         for (uint i = 0; i < sigR.length; i++) {
 
@@ -597,16 +639,23 @@ contract Escrow_v1_0 {
                 sigR[i],
                 sigS[i]
             );
+            
+            bytes32 addressHash = keccak256(
+                abi.encodePacked(
+                    recovered, 
+                    transactions[scriptHash].noOfReleases
+                )
+            );
 
             require(
                 transactions[scriptHash].isOwner[recovered],
                 "Invalid signature"
             );
             require(
-                !transactions[scriptHash].voted[recovered],
+                !transactions[scriptHash].voted[addressHash],
                 "Same signature sent twice"
             );
-            transactions[scriptHash].voted[recovered] = true;
+            transactions[scriptHash].voted[addressHash] = true;
         }
     }
 
@@ -680,7 +729,9 @@ contract Escrow_v1_0 {
             threshold: threshold,
             timeoutHours: timeoutHours,
             transactionType:transactionType,
-            tokenAddress:tokenAddress
+            tokenAddress:tokenAddress,
+            released: uint256(0),
+            noOfReleases: uint256(0)
         });
 
         transactions[scriptHash].isOwner[seller] = true;

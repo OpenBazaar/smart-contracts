@@ -655,7 +655,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         }
     });
 
-    it("Execute already executed Transaction", async()=>{
+    it("Execute already executed Transaction where all funds are released", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = acct[2];
@@ -836,6 +836,32 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         }
     });
 
+    it("Execute Transaction with duplicate signatures", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var sig = helper.createSigs([buyer, seller, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+            assert.equal(true, false, "Should not be able to execute transaction with duplicate signatures!!");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
+    });
+
 
     it("Execute Transaction with total value being sent smaller than overall transaction value", async()=>{
         var buyer = acct[0];
@@ -847,20 +873,29 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
         var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.8", "ether");
-        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.2", "ether");
+        var released = Number(amountToBeGivenToModerator) + Number(amountToBeGivenToSeller);
 
-        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("2", "ether")});
 
         var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
-        try{
-            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with total value being released smaller than overall transaction value");
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
-        }catch(error){
-            assert.notInclude(error.toString(), 'AssertionError', error.message);
+        var transaction = await this.escrow.transactions(scriptHash);
 
-        }
+        var releasedAmount = transaction[10];
+
+        assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var transaction = await this.escrow.transactions(scriptHash);
+
+        var releasedAmount = transaction[10];
+
+        assert.equal(released * 2, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+
     });
 
     it("Execute Transaction with one of the sent amount being 0", async()=>{
