@@ -71,4 +71,13 @@ interface IEscrow {
         external
         view
         returns(bool vote);
+
+    function getTransactionHash(
+        bytes32 scriptHash, 
+        address[] destinations, 
+        uint256[] amounts
+    )
+        external
+        view
+        returns(bytes32);
 }
