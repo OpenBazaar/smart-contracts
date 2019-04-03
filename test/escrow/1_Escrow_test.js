@@ -8,7 +8,7 @@ var BigNumber = require('bignumber.js');
 
 var helper = require("../helper.js");
 
-contract("Escrow Contract Version 1- Supports Token transfer", function() {
+contract("Escrow Contract", function() {
 
   let acct;
   var repeatedScriptHash;
@@ -20,7 +20,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
     this.escrow = await Escrow.new({from:acct[0]});
     this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
-    this.escrowProxy = await EscrowProxy.new(this.escrow.address);
+    this.escrowProxy = await EscrowProxy.new("0x0000000000000000000000000000000000000000");
        
 });
 
@@ -908,7 +908,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
         assert.equal(1, Number(noOfReleases), "Number of releases by now should be 1");
-
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
         var transaction = await this.escrow.transactions(scriptHash);
@@ -918,6 +919,46 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         assert.equal(released * 2, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
         assert.equal(2, Number(noOfReleases), "Number of releases by now should be 2");
+
+    });
+
+    it("Execute Transaction with same signature being sent twice", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.8", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.2", "ether");
+        var released = Number(amountToBeGivenToModerator) + Number(amountToBeGivenToSeller);
+
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("2", "ether")});
+
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
+
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var transaction = await this.escrow.transactions(scriptHash);
+
+        var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
+
+        assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(1, Number(noOfReleases), "Number of releases by now should be 1");
+        
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+            assert.equal(true, false, "Should not be able to execute transaction with same old signature");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
 
     });
 

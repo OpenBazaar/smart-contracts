@@ -401,7 +401,7 @@ contract Escrow {
         //Increment release conuter
         transactions[scriptHash].noOfReleases = transactions[scriptHash].
             noOfReleases.add(1);
-            
+
         transactions[scriptHash].released = _transferFunds(
             scriptHash, 
             destinations, 
@@ -414,6 +414,48 @@ contract Escrow {
         );
 
         emit Executed(scriptHash, destinations, amounts);
+    }
+
+    /** 
+    * @dev Returns transaction hash which signers need to sign
+    * @param scriptHash Script hash of the transaction
+    * @param destinations List of addresses who will receive funds
+    * @param amounts amount released to each destination
+    */
+    function getTransactionHash(
+        bytes32 scriptHash, 
+        address[] destinations, 
+        uint256[] amounts
+    ) 
+        public 
+        view 
+        returns(bytes32)
+    {   
+
+        bytes32 releaseHash = keccak256(
+            abi.encode(
+                keccak256(destinations), 
+                keccak256(amounts)
+            )
+        );
+
+        // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
+        bytes32 txHash = keccak256(
+            abi.encodePacked(
+                "\x19Ethereum Signed Message:\n32",
+                keccak256(
+                    abi.encodePacked(
+                        byte(0x19),
+                        byte(0),
+                        address(this),
+                        releaseHash,
+                        transactions[scriptHash].noOfReleases,
+                        scriptHash
+                    )
+                )
+            )
+        );
+        return txHash;
     }
 
     /**
@@ -614,21 +656,10 @@ contract Escrow {
         require(sigR.length == sigS.length, "R,S length mismatch");
         require(sigR.length == sigV.length, "R,V length mismatch");
 
-        // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
-        bytes32 txHash = keccak256(
-            abi.encodePacked(
-                "\x19Ethereum Signed Message:\n32",
-                keccak256(
-                    abi.encodePacked(
-                        byte(0x19),
-                        byte(0),
-                        address(this),
-                        destinations,
-                        amounts,
-                        scriptHash
-                    )
-                )
-            )
+        bytes32 txHash = getTransactionHash(
+            scriptHash, 
+            destinations, 
+            amounts
         );
 
         for (uint i = 0; i < sigR.length; i++) {

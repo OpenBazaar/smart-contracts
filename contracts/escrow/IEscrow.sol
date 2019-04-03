@@ -77,7 +77,7 @@ interface IEscrow {
         address[] destinations, 
         uint256[] amounts
     )
-        external
+        public
         view
         returns(bytes32);
 }

@@ -1,8 +1,9 @@
 var OBRewards = artifacts.require("OBRewards");
 var OBToken = artifacts.require("OBToken");
 var Escrow = artifacts.require("Escrow");
-var helper = require("../helper.js");
+var EscrowProxy = artifacts.require("EscrowProxy");
 
+var helper = require("../helper.js");
 var Web3 = require("web3");
 var web3 = new Web3("http://localhost:8555");
 var BigNumber = require('bignumber.js');
@@ -36,8 +37,10 @@ contract("OB Rewards Contract", function() {
         
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
-    
-        var sig = helper.createSigs([seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+            
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [seller, moderator]);
+
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
     
         transactions[scriptHash] = new Object();
@@ -67,7 +70,9 @@ contract("OB Rewards Contract", function() {
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
     
-        var sig = helper.createSigs([seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [seller, moderator]);
+
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
     
         transactions[scriptHash] = new Object();
@@ -110,7 +115,8 @@ contract("OB Rewards Contract", function() {
         await this.rewards.addPromotedSellers(promotedSellers, {from:acct[0]});
 
         await this.OBT.transfer(this.rewards.address, 570000000000000000000, {from:acct[0]});
-    
+        this.escrowProxy = await EscrowProxy.new("0x0000000000000000000000000000000000000000");
+
     });
 
     it("Claim reward for transaction when rewards is not on", async()=>{
