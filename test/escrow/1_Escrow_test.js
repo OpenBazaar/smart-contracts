@@ -1,4 +1,4 @@
-var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
+var Escrow = artifacts.require("Escrow");
 var TestToken = artifacts.require("TestToken");
 var EscrowProxy = artifacts.require("EscrowProxy");
 
@@ -18,7 +18,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     
     acct = await helper.setupWallet();
 
-    this.escrow = await Escrow_v1_0.new({from:acct[0]});
+    this.escrow = await Escrow.new({from:acct[0]});
     this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
     this.escrowProxy = await EscrowProxy.new(this.escrow.address);
        
@@ -904,16 +904,20 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var transaction = await this.escrow.transactions(scriptHash);
 
         var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
 
         assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(1, Number(noOfReleases), "Number of releases by now should be 1");
 
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
         var transaction = await this.escrow.transactions(scriptHash);
 
         var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
 
         assert.equal(released * 2, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(2, Number(noOfReleases), "Number of releases by now should be 2");
 
     });
 

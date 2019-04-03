@@ -15,11 +15,7 @@ contract EscrowProxy {
 
     constructor(address _legacyEscrowVersion) public {
 
-        require(
-            _legacyEscrowVersion != address(0), 
-            "Invalid Escrow contract address!!"
-        );
-
+        //empty address allowed in case of no legacy contract
         legacyEscrowVersion = _legacyEscrowVersion;
     }
 

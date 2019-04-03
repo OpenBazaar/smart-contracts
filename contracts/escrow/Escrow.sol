@@ -15,7 +15,7 @@ import "../token/ITokenContract.sol";
 * Please read below mentioned link for detailed specs
 * https://github.com/OpenBazaar/smart-contracts/blob/master/contracts/escrow/EscrowSpec.md
 */
-contract Escrow_v1_0 {
+contract Escrow {
 
     using SafeMath for uint256;
 
@@ -53,7 +53,8 @@ contract Escrow_v1_0 {
         address tokenAddress; //token address in case of token transfer
         address moderator;
         uint256 released;
-        uint256 noOfReleases;//Number of times execution took place
+        //Number of times execution took place. More like a nonce
+        uint256 noOfReleases;
         mapping(address => bool) isOwner; //to keep track of owners.
         //to keep track of who all voted in latest transaction execution.
         //This list will be refreshed with every execution
@@ -260,7 +261,7 @@ contract Escrow_v1_0 {
     {   
         bool voted = false;
 
-        for (uint256 i = 1; i<=transactions[scriptHash].noOfReleases; i++){
+        for (uint256 i = 0; i<transactions[scriptHash].noOfReleases; i++){
 
             bytes32 addressHash = keccak256(abi.encodePacked(party, i));
 
@@ -397,7 +398,10 @@ contract Escrow_v1_0 {
         transactions[scriptHash].status = Status.RELEASED;
         //Last modified timestamp modified, which will be used by rewards
         transactions[scriptHash].lastModified = block.timestamp;
-
+        //Increment release conuter
+        transactions[scriptHash].noOfReleases = transactions[scriptHash].
+            noOfReleases.add(1);
+            
         transactions[scriptHash].released = _transferFunds(
             scriptHash, 
             destinations, 
@@ -593,7 +597,6 @@ contract Escrow_v1_0 {
         return valueTransferred;
     }
 
-
     /**
     *@dev Checks whether the signatures are valid or not and marks signers as
     * having "voted".
@@ -627,9 +630,6 @@ contract Escrow_v1_0 {
                 )
             )
         );
-        //Increment release conuter
-        transactions[scriptHash].noOfReleases = transactions[scriptHash].
-            noOfReleases.add(1);
 
         for (uint i = 0; i < sigR.length; i++) {
 

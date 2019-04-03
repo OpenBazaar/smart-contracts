@@ -368,7 +368,7 @@ contract OBRewards is Ownable {
     * claim their rewards in one go. This will save one transaction.
     * Users can only use this method if their trade is using escrowContract
     * for escrow.
-    * See the execute() method Escrow_v1_0.sol for more information.
+    * See the execute() method Escrow.sol for more information.
     */
     function executeAndClaim(
         uint8[] sigV,

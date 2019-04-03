@@ -1,6 +1,6 @@
 var OBRewards = artifacts.require("OBRewards");
 var OBToken = artifacts.require("OBToken");
-var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
+var Escrow = artifacts.require("Escrow");
 var helper = require("../helper.js");
 
 var Web3 = require("web3");
@@ -102,7 +102,7 @@ contract("OB Rewards Contract", function() {
         //console.log("promoted", promotedSellers);
         //console.log("non-promoted", nonPromotedSellers);
 
-        this.escrow = await Escrow_v1_0.new({from:acct[0]});
+        this.escrow = await Escrow.new({from:acct[0]});
     
         this.OBT = await OBToken.new("Open Bazaar", "OBT", 18, 100000000, {from:acct[0]});
 
