@@ -1,6 +1,6 @@
 /* solium-disable security/no-block-members */
 
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../token/ITokenContract.sol";
@@ -61,7 +61,7 @@ contract PowerUps {
     * @return id Index of the PowerUp in the powerUps[] array
     */
     function addPowerUp(
-        string contentAddress,
+        string calldata contentAddress,
         uint256 amount,
         bytes32 keyword
     )
@@ -89,12 +89,12 @@ contract PowerUps {
     * limit.
     */
     function addPowerUps(
-        string contentAddress,
-        uint256[] amounts,
-        bytes32[] keywords
+        string calldata contentAddress,
+        uint256[] calldata amounts,
+        bytes32[] calldata keywords
     )
         external
-        returns (uint256[] ids)
+        returns (uint256[] memory ids)
     {
 
         require(
@@ -154,7 +154,7 @@ contract PowerUps {
         external
         view
         returns (
-            string contentAddress,
+            string memory contentAddress,
             uint256 tokensBurned,
             uint256 lastTopupTime,
             bytes32 keyword
@@ -223,7 +223,7 @@ contract PowerUps {
     function getPowerUpIds(bytes32 keyword)
         external
         view
-        returns (uint256[] ids)
+        returns (uint256[] memory ids)
     {
 
         ids = keywordVsPowerUpIds[keyword];
@@ -234,7 +234,7 @@ contract PowerUps {
 
     //private helper
     function _addPowerUp(
-        string contentAddress,
+        string memory contentAddress,
         uint256 amount,
         bytes32 keyword
     )

@@ -1,6 +1,6 @@
 /* solium-disable security/no-block-members */
 
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -144,7 +144,12 @@ contract OBRewards is Ownable {
     * No Seller out of this list should already be promoted, otherwise
     * transaction will fail
     */
-    function addPromotedSellers(address[] sellers) external onlyOwner {
+    function addPromotedSellers(
+        address[] calldata sellers
+    ) 
+        external 
+        onlyOwner 
+    {
 
         for (uint256 i = 0; i < sellers.length; i++) {
             require(
@@ -166,7 +171,12 @@ contract OBRewards is Ownable {
     * @dev Remove exisiting promoted sellers
     * @param sellers List of sellers to be removed
     */
-    function removePromotedSellers(address[] sellers) external onlyOwner {
+    function removePromotedSellers(
+        address[] calldata sellers
+    ) 
+        external 
+        onlyOwner 
+    {
 
         for (uint256 i = 0; i < sellers.length; i++) {
 
@@ -186,7 +196,7 @@ contract OBRewards is Ownable {
     )
         external
         view
-        returns (address[] buyers)
+        returns (address[] memory buyers)
     {
         buyers = sellerVsBuyersArray[seller];
         return buyers;
@@ -239,7 +249,7 @@ contract OBRewards is Ownable {
         onlyOwner
         nonZeroAddress(receiver)
     {
-        uint256 amount = obToken.balanceOf(this);
+        uint256 amount = obToken.balanceOf(address(this));
 
         obToken.transfer(receiver, amount);
     }
@@ -371,12 +381,12 @@ contract OBRewards is Ownable {
     * See the execute() method Escrow.sol for more information.
     */
     function executeAndClaim(
-        uint8[] sigV,
-        bytes32[] sigR,
-        bytes32[] sigS,
+        uint8[] memory sigV,
+        bytes32[] memory sigR,
+        bytes32[] memory sigS,
         bytes32 scriptHash,
-        address[] destinations,
-        uint256[] amounts
+        address[] memory destinations,
+        uint256[] memory amounts
     )
         public
         rewardsRunning
@@ -411,7 +421,12 @@ contract OBRewards is Ownable {
     * this function.
     * Be mindful of the block gas limit (do not pass too many scripthashes).
     */
-    function claimRewards(bytes32[] scriptHashes) public rewardsRunning {
+    function claimRewards(
+        bytes32[] memory scriptHashes
+    ) 
+        public 
+        rewardsRunning 
+    {
 
         require(scriptHashes.length > 0, "No script hash passed");
 
@@ -438,7 +453,7 @@ contract OBRewards is Ownable {
                 lastModified
             );
 
-            uint256 contractBalance = obToken.balanceOf(this);
+            uint256 contractBalance = obToken.balanceOf(address(this));
 
             if (rewardAmount > contractBalance) {
                 rewardAmount = contractBalance;

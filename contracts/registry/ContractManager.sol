@@ -1,6 +1,6 @@
 /* solium-disable security/no-block-members */
 
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
@@ -89,13 +89,17 @@ contract ContractManager is Ownable {
         _;
     }
 
-    modifier contractRegistered(string contractName) {
+    modifier contractRegistered(string memory contractName) {
 
         require(contractExists[contractName], "Contract does not exists");
         _;
     }
 
-    modifier versionExists(string contractName, string versionName) {
+    modifier versionExists(
+        string memory contractName, 
+        string memory versionName
+    ) 
+    {
         require(
             contractVsVersions[contractName][versionName].implementation != address(0),
             "Version does not exists for contract"
@@ -111,8 +115,8 @@ contract ContractManager is Ownable {
     * @param implementation The address of the implementation of the version
     */
     function addVersion(
-        string contractName,
-        string versionName,
+        string calldata contractName,
+        string calldata versionName,
         Status status,
         address implementation
     )
@@ -167,8 +171,8 @@ contract ContractManager is Ownable {
     * @param bugLevel New bug level for the contract
     */
     function updateVersion(
-        string contractName,
-        string versionName,
+        string calldata contractName,
+        string calldata versionName,
         Status status,
         BugLevel bugLevel
     )
@@ -195,8 +199,8 @@ contract ContractManager is Ownable {
     * @param versionName Version of the contract
     */
     function markRecommendedVersion(
-        string contractName,
-        string versionName
+        string calldata contractName,
+        string calldata versionName
     )
         external
         onlyOwner
@@ -214,13 +218,13 @@ contract ContractManager is Ownable {
     * @return Details of recommended version
     */
     function getRecommendedVersion(
-        string contractName
+        string calldata contractName
     )
         external
         view
         contractRegistered(contractName)
         returns (
-            string versionName,
+            string memory versionName,
             Status status,
             BugLevel bugLevel,
             address implementation,
@@ -253,7 +257,7 @@ contract ContractManager is Ownable {
     * @dev Allows owner to remove a version from being recommended
     * @param contractName Name of the contract
     */
-    function removeRecommendedVersion(string contractName)
+    function removeRecommendedVersion(string calldata contractName)
         external
         onlyOwner
         contractRegistered(contractName)
@@ -276,7 +280,7 @@ contract ContractManager is Ownable {
     * @dev Get total count of versions for the contract
     * @param contractName Name of the contract
     */
-    function getVersionCountForContract(string contractName)
+    function getVersionCountForContract(string calldata contractName)
         external
         view
         returns (uint256 count)
@@ -292,7 +296,7 @@ contract ContractManager is Ownable {
     function getContractAtIndex(uint256 index)
         external
         view
-        returns (string contractName)
+        returns (string memory contractName)
     {
         contractName = contracts[index];
         return contractName;
@@ -304,10 +308,10 @@ contract ContractManager is Ownable {
     * @param contractName Name of the contract
     * @param index The index to be searched for
     */
-    function getVersionAtIndex(string contractName, uint256 index)
+    function getVersionAtIndex(string calldata contractName, uint256 index)
         external
         view
-        returns (string versionName)
+        returns (string memory versionName)
     {
         versionName = contractVsVersionString[contractName][index];
         return versionName;
@@ -318,11 +322,14 @@ contract ContractManager is Ownable {
     * @param contractName Name of the contract
     * @param versionName Version string for the contract
     */
-    function getVersionDetails(string contractName, string versionName)
+    function getVersionDetails(
+        string calldata contractName, 
+        string calldata versionName
+    )
         external
         view
         returns (
-            string versionString,
+            string memory versionString,
             Status status,
             BugLevel bugLevel,
             address implementation,

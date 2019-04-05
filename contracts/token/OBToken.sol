@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 
@@ -10,8 +10,8 @@ contract OBToken is ERC20Burnable {
     uint8 public decimals;
 
     constructor(
-        string _name,
-        string _symbol,
+        string memory _name,
+        string memory _symbol,
         uint8 _decimals, 
         uint256 _totalSupply
     )

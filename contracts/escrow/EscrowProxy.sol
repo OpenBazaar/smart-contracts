@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "./IEscrow.sol";
 
@@ -32,8 +32,8 @@ contract EscrowProxy {
     function getTransactionHash(
         address escrowVersion, 
         bytes32 scriptHash, 
-        address[] destinations, 
-        uint256[] amounts
+        address[] calldata destinations, 
+        uint256[] calldata amounts
     ) 
         external
         view 
@@ -71,8 +71,8 @@ contract EscrowProxy {
 
     function _legacyEscrowTxHash(
         bytes32 scriptHash, 
-        address[] destinations, 
-        uint256[] amounts
+        address[] memory destinations, 
+        uint256[] memory amounts
     )
         private
         view

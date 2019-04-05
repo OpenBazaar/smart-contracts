@@ -33,7 +33,7 @@ contract("OB Rewards Contract", function() {
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
         var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
-        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
         
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
@@ -65,7 +65,7 @@ contract("OB Rewards Contract", function() {
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator,  this.escrow.address);
         var scriptHash = helper.getScriptHash(redeemScript);
         var amount = web3.utils.toWei("1", "ether");
-        await this.escrow.addTransaction(buyer, seller, [moderator], threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:amount});
         
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
@@ -104,17 +104,15 @@ contract("OB Rewards Contract", function() {
         for(var i = 0;i<1500;i++){
             buyers.push(acct[31+i]);
         }
-        //console.log("promoted", promotedSellers);
-        //console.log("non-promoted", nonPromotedSellers);
 
         this.escrow = await Escrow.new({from:acct[0]});
     
-        this.OBT = await OBToken.new("Open Bazaar", "OBT", 18, 100000000, {from:acct[0]});
+        this.OBT = await OBToken.new("Open Bazaar", "OBT", 18, "100000000", {from:acct[0]});
 
-        this.rewards = await OBRewards.new(500000000000000000000, 432000, this.escrow.address, this.OBT.address, {from:acct[0]});
+        this.rewards = await OBRewards.new("500000000000000000000", 432000, this.escrow.address, this.OBT.address, {from:acct[0]});
         await this.rewards.addPromotedSellers(promotedSellers, {from:acct[0]});
 
-        await this.OBT.transfer(this.rewards.address, 570000000000000000000, {from:acct[0]});
+        await this.OBT.transfer(this.rewards.address, "570000000000000000000", {from:acct[0]});
         this.escrowProxy = await EscrowProxy.new("0x0000000000000000000000000000000000000000");
 
     });
@@ -240,9 +238,8 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "SuccessfulClaim", "SuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
-
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
         }
     });
 
@@ -266,8 +263,8 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "SuccessfulClaim", "SuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
     });
@@ -285,8 +282,10 @@ contract("OB Rewards Contract", function() {
 
         }
         var previousBuyerBalance = await this.OBT.balanceOf(buyer);
+        previousBuyerBalance=new BigNumber(previousBuyerBalance);
 
         var contractTokenBalance = await this.OBT.balanceOf(this.rewards.address);
+        contractTokenBalance = new BigNumber(contractTokenBalance);
 
         var txResult = await this.rewards.claimRewards(scriptHashes);
         
@@ -298,19 +297,19 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "SuccessfulClaim", "SuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
         var newBuyerBalance = await this.OBT.balanceOf(buyer);
-
+        newBuyerBalance = new BigNumber(newBuyerBalance);
         assert.equal(newBuyerBalance.toNumber() - previousBuyerBalance.toNumber(), contractTokenBalance.toNumber(), "Contract's token balance before claim must match the tokens transferred to buyer after claim");
 
     });
 
     it("Once the contract has been replenished with more tokens buyer should be able to claim remaining tokens for the same seller", async()=>{
 
-        await this.OBT.transfer(this.rewards.address, 20000000000000000000, {from:acct[0]});
+        await this.OBT.transfer(this.rewards.address, "20000000000000000000", {from:acct[0]});
 
         var transactions = await createCompletedTransactionsWithPromotedSellers(12, 1);
 
@@ -323,8 +322,10 @@ contract("OB Rewards Contract", function() {
 
         }
         var previousBuyerBalance = await this.OBT.balanceOf(buyer);
+        previousBuyerBalance = new BigNumber(previousBuyerBalance);
 
         var contractTokenBalance = await this.OBT.balanceOf(this.rewards.address);
+        contractTokenBalance = new BigNumber(contractTokenBalance);
 
         var remainingTokens = 50000000000000000000 - contractTokenBalance.toNumber();
 
@@ -338,15 +339,16 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "SuccessfulClaim", "SuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
         var newBuyerBalance = await this.OBT.balanceOf(buyer);
+        newBuyerBalance = new BigNumber(newBuyerBalance);
 
         assert.equal(newBuyerBalance.toNumber() - previousBuyerBalance.toNumber(), contractTokenBalance.toNumber(), "Contract's token balance before claim must match the tokens transferred to buyer after claim");
 
-        await this.OBT.transfer(this.rewards.address, 100000000000000000000, {from:acct[0]});
+        await this.OBT.transfer(this.rewards.address, "100000000000000000000", {from:acct[0]});
 
         var txResult = await this.rewards.claimRewards(scriptHashes);
         
@@ -358,13 +360,13 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "SuccessfulClaim", "SuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
 
         var secondNewBuyerBalance = await this.OBT.balanceOf(buyer);
-
+        secondNewBuyerBalance = new BigNumber(secondNewBuyerBalance);
         assert.equal(secondNewBuyerBalance.toNumber() - newBuyerBalance.toNumber(), remainingTokens, "Buyer should receive the remaining amout of tokens");
 
 
@@ -388,8 +390,8 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "UnsuccessfulClaim", "UnsuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
 
@@ -415,8 +417,8 @@ contract("OB Rewards Contract", function() {
             var seller = txResult.logs[i].args.seller;
 
             assert.equal(eventName, "UnsuccessfulClaim", "UnsuccessfulClaim event must be fired");
-            assert.equal(buyer, transactions[scriptHash].buyer, "Passed and received buyers are not matching");
-            assert.equal(seller, transactions[scriptHash].seller, "Passed and received sellers are not matching");
+            assert.equal(buyer, web3.utils.toChecksumAddress(transactions[scriptHash].buyer), "Passed and received buyers are not matching");
+            assert.equal(seller, web3.utils.toChecksumAddress(transactions[scriptHash].seller), "Passed and received sellers are not matching");
 
         }
 

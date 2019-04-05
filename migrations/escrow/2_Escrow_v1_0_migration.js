@@ -1,6 +1,6 @@
-var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
+var Escrow = artifacts.require("Escrow");
 
 module.exports = async(deployer) =>{
-  await deployer.deploy(Escrow_v1_0);
+  await deployer.deploy(Escrow);
   
 };

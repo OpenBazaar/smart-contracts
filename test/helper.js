@@ -78,7 +78,7 @@ const resetTime = async()=>{
     await web3.currentProvider.send({
         jsonrpc: '2.0', 
         method: 'evm_mine', 
-        params: [new Date().getTime()/1000], 
+        params: [Math.floor(new Date().getTime()/1000)], 
         id: new Date().getTime()
       }, function(err, result){
     });

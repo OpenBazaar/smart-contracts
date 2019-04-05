@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 interface IEscrow {
 
@@ -47,12 +47,12 @@ interface IEscrow {
     function addTokensToTransaction(bytes32 scriptHash, uint256 value)external;
 
     function execute(
-        uint8[] sigV,
-        bytes32[] sigR,
-        bytes32[] sigS,
+        uint8[] calldata sigV,
+        bytes32[] calldata sigR,
+        bytes32[] calldata sigS,
         bytes32 scriptHash,
-        address[] destinations,
-        uint256[] amounts
+        address[] calldata destinations,
+        uint256[] calldata amounts
     )
         external;
 
@@ -74,10 +74,10 @@ interface IEscrow {
 
     function getTransactionHash(
         bytes32 scriptHash, 
-        address[] destinations, 
-        uint256[] amounts
+        address[] calldata destinations, 
+        uint256[] calldata amounts
     )
-        public
+        external
         view
         returns(bytes32);
 }

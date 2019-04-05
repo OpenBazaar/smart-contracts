@@ -78,7 +78,7 @@ contract("Keyword Based Powerups Contract", function(account) {
     var receivedinitiator = txResult.logs[0].args.initiator;
     var receivedId = txResult.logs[0].args.id;
     var receivedTokensBurnt = txResult.logs[0].args.tokensBurned;
-
+    receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
     assert.equal(
       receivedEvent,
       "NewPowerUpAdded",
@@ -236,7 +236,7 @@ contract("Keyword Based Powerups Contract", function(account) {
       var receivedinitiator = txResult.logs[i].args.initiator;
       var receivedId = txResult.logs[i].args.id;
       var receivedTokensBurnt = txResult.logs[i].args.tokensBurned;
-
+      receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
       assert.equal(
         receivedEvent,
         "NewPowerUpAdded",
@@ -295,7 +295,7 @@ contract("Keyword Based Powerups Contract", function(account) {
     var receivedinitiator = txResult.logs[0].args.initiator;
     var receivedId = txResult.logs[0].args.id;
     var receivedTokensBurnt = txResult.logs[0].args.tokensBurned;
-
+    receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
     assert.equal(receivedEvent, "Topup", "Topup event should be fired");
     assert.equal(
       receivedinitiator,
@@ -335,7 +335,6 @@ contract("Keyword Based Powerups Contract", function(account) {
     await this.OBT.approve(this.keywordPowerup.address, amount, {
       from: initiator
     });
-
     try {
       await this.keywordPowerup.topUpPowerUp(id, amount, { from: initiator });
       assert.equal(true, false, "Topup must fail for non-existing powerup");
@@ -385,7 +384,7 @@ contract("Keyword Based Powerups Contract", function(account) {
 
     var receivedContentAddress = powerUpInfo[0];
     var receivedTokensBurnt = powerUpInfo[1];
-
+    receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
     assert.equal(
       receivedContentAddress,
       powerUps[ids[0]].contentAddress,

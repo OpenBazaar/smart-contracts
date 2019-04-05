@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -25,7 +25,7 @@ contract Escrow {
 
     event Executed(
         bytes32 indexed scriptHash,
-        address[] destinations,
+        address payable[] destinations,
         uint256[] amounts
     );
 
@@ -348,7 +348,7 @@ contract Escrow {
     )
         external
         view
-        returns (bytes32[])
+        returns (bytes32[] memory)
     {
         return partyVsTransaction[partyAddress];
     }
@@ -365,12 +365,12 @@ contract Escrow {
     *@param amounts amount released to each destination
     */
     function execute(
-        uint8[] sigV,
-        bytes32[] sigR,
-        bytes32[] sigS,
+        uint8[] calldata sigV,
+        bytes32[] calldata sigR,
+        bytes32[] calldata sigS,
         bytes32 scriptHash,
-        address[] destinations,
-        uint256[] amounts
+        address payable[] calldata destinations,
+        uint256[] calldata amounts
     )
         external
         transactionExists(scriptHash)
@@ -424,8 +424,8 @@ contract Escrow {
     */
     function getTransactionHash(
         bytes32 scriptHash, 
-        address[] destinations, 
-        uint256[] amounts
+        address payable[] memory destinations, 
+        uint256[] memory amounts
     ) 
         public 
         view 
@@ -434,8 +434,8 @@ contract Escrow {
 
         bytes32 releaseHash = keccak256(
             abi.encode(
-                keccak256(destinations), 
-                keccak256(amounts)
+                keccak256(abi.encodePacked(destinations)), 
+                keccak256(abi.encodePacked(amounts))
             )
         );
 
@@ -519,12 +519,12 @@ contract Escrow {
     *    execution is signed by seller
     */
     function _verifyTransaction(
-        uint8[] sigV,
-        bytes32[] sigR,
-        bytes32[] sigS,
+        uint8[] memory sigV,
+        bytes32[] memory sigR,
+        bytes32[] memory sigS,
         bytes32 scriptHash,
-        address[] destinations,
-        uint256[] amounts
+        address payable[] memory destinations,
+        uint256[] memory amounts
     )
         private
     {
@@ -569,8 +569,8 @@ contract Escrow {
     */
     function _transferFunds(
         bytes32 scriptHash,
-        address[]destinations,
-        uint256[]amounts
+        address payable[] memory destinations,
+        uint256[] memory amounts
     )
         private
         returns (uint256)
@@ -644,12 +644,12 @@ contract Escrow {
     * having "voted".
     */
     function _verifySignatures(
-        uint8[] sigV,
-        bytes32[] sigR,
-        bytes32[] sigS,
+        uint8[] memory sigV,
+        bytes32[] memory sigR,
+        bytes32[] memory sigS,
         bytes32 scriptHash,
-        address[] destinations,
-        uint256[]amounts
+        address payable[] memory destinations,
+        uint256[] memory amounts
     )
         private
     {

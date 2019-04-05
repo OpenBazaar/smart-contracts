@@ -25,9 +25,9 @@ contract("Escrow Contract", function() {
 });
 
     it("Add new transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -55,7 +55,7 @@ contract("Escrow Contract", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was not sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -74,7 +74,7 @@ contract("Escrow Contract", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -85,8 +85,8 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new 1-of-2 multisig escrow transaction with moderator address as zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x0000000000000000000000000000000000000000";
         var threshold = 1;
         var timeoutHours = 6;
@@ -115,7 +115,7 @@ contract("Escrow Contract", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -134,7 +134,7 @@ contract("Escrow Contract", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -145,9 +145,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new 1-of-2 multisig escrow transaction with moderator address as non-zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[3];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[3]);
         var threshold = 1;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -175,7 +175,7 @@ contract("Escrow Contract", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -194,7 +194,7 @@ contract("Escrow Contract", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -205,9 +205,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add funds to ETHER transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -235,7 +235,7 @@ contract("Escrow Contract", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.valueAdded;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "FundAdded", "FundAdded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -248,15 +248,15 @@ contract("Escrow Contract", function() {
         var transaction = await this.escrow.transactions(scriptHash);
        
         var receivedAmount = transaction[0];
-       
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedAmount.toNumber(), Number(amount) +Number(amount), "Received amount does not match the amount sent");
        
     });
 
     it("Add funds to ETHER transaction from non-buyer account", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -280,9 +280,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with same buyer and seller", async()=>{
-        var buyer = acct[0];
-        var seller = acct[0];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[0]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -302,9 +302,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with 0 value", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -324,9 +324,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with threshold greater than number of parties involved", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 4;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -346,9 +346,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with threshold 0", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 0;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -368,8 +368,8 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with moderator being one of the buyer or seller", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = buyer;
         var threshold = 2;
         var timeoutHours = 6;
@@ -391,8 +391,8 @@ contract("Escrow Contract", function() {
 
     it("Add new transaction with buyer being zero address", async()=>{
         var buyer = "0x";
-        var seller = acct[1];
-        var moderator = acct[2];
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -412,9 +412,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with seller being zero address", async()=>{
-        var buyer = acct[0];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
         var seller = "0x";
-        var moderator = acct[2];
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -434,8 +434,8 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with moderator being zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x";
         var threshold = 2;
         var timeoutHours = 6;
@@ -456,9 +456,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new transaction with previously added script hash", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;        
         var amount = web3.utils.toWei("1", "ether");        
@@ -692,9 +692,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add Transaction with wrong unique id", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 3;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1193,9 +1193,9 @@ contract("Escrow Contract", function() {
 
 
     it("Add new Token transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1205,8 +1205,8 @@ contract("Escrow Contract", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1216,14 +1216,14 @@ contract("Escrow Contract", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1243,7 +1243,7 @@ contract("Escrow Contract", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1257,8 +1257,8 @@ contract("Escrow Contract", function() {
     });
 
     it("Add 1-of-2 Token transaction with moderator address as zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x0000000000000000000000000000000000000000";
         var threshold = 1;
         var timeoutHours = 6;
@@ -1269,8 +1269,8 @@ contract("Escrow Contract", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1280,14 +1280,14 @@ contract("Escrow Contract", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1307,7 +1307,7 @@ contract("Escrow Contract", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1321,9 +1321,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add 1-of-2 Token transaction with moderator address as non-zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[3];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[3]);
         var threshold = 1;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1333,8 +1333,8 @@ contract("Escrow Contract", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1344,14 +1344,14 @@ contract("Escrow Contract", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1371,7 +1371,7 @@ contract("Escrow Contract", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1386,9 +1386,9 @@ contract("Escrow Contract", function() {
 
 
     it("Add funds to Token transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1405,8 +1405,8 @@ contract("Escrow Contract", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var txResult = await this.token.approve(this.escrow.address, amount, {from:buyer});
         txResult = await this.escrow.addTokensToTransaction(scriptHash, amount,{from:buyer});
@@ -1414,14 +1414,14 @@ contract("Escrow Contract", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.valueAdded;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "FundAdded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1441,7 +1441,7 @@ contract("Escrow Contract", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount) + Number(amount), "Received amount does not match the amount sent");
@@ -1455,9 +1455,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add funds to Token transaction from non-buyer's account", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1484,9 +1484,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new Token transaction without apporving the escrow contract to transfer required amount of tokens on behalf of sender", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1508,9 +1508,9 @@ contract("Escrow Contract", function() {
     });
 
     it("Add new Token transaction by approving less amount of tokens then required", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1555,9 +1555,9 @@ contract("Escrow Contract", function() {
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
         var moderatorBalanceBefore = await this.token.balanceOf(moderator);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
-        moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
+        moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
@@ -1571,9 +1571,9 @@ contract("Escrow Contract", function() {
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
         var moderatorBalanceAfter = await this.token.balanceOf(moderator);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
-        moderatorBalanceAfter = new BigNumber(moderatorBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
+        moderatorBalanceAfter = new BigNumber(moderatorBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(moderatorBalanceBefore.plus(Number(amountToBeGivenToModerator)).toNumber(), moderatorBalanceAfter.toNumber(), "Moderator's token balance must increase by : "+amountToBeGivenToModerator);
@@ -1601,8 +1601,8 @@ contract("Escrow Contract", function() {
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -1615,8 +1615,8 @@ contract("Escrow Contract", function() {
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must reduce by escrowed amount");
@@ -1643,8 +1643,8 @@ contract("Escrow Contract", function() {
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -1657,8 +1657,8 @@ contract("Escrow Contract", function() {
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must reduce by escrowed amount");
@@ -1685,8 +1685,8 @@ contract("Escrow Contract", function() {
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
