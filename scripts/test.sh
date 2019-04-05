@@ -27,8 +27,8 @@ start_ganache() {
  menomic_string="dog permit example repeat gloom defy teach pumpkin library remain scorpion skull"
 
   if [ "$SOLIDITY_COVERAGE" = true ]; then
-    echo "Running test rpc"
-    node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffff --port "$ganache_port" -m "$menomic_string" -e 1000 -a 100 > /dev/null &
+    echo "Running Ganache CLI Coverage"
+    node_modules/.bin/ganache-cli-coverage --emitFreeLogs true --allowUnlimitedContractSize true --gasLimit 0xfffffffffff --port "$ganache_port" -m "$menomic_string" -e 1000 -a 100 > /dev/null &
   else
     echo "Running Ganache"
     node_modules/.bin/ganache-cli --gasLimit 0xfffffffffff -m "$menomic_string" -e 1000 -a 100 -p $ganache_port > /dev/null &
