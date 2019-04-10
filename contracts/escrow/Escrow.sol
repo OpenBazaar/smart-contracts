@@ -221,11 +221,12 @@ contract Escrow {
 
         ITokenContract token = ITokenContract(tokenAddress);
 
+        emit Funded(scriptHash, msg.sender, value);
+
         require(
             token.transferFrom(msg.sender, address(this), value),
             "Token transfer failed, maybe you did not approve escrow contract to spend on behalf of sender"
         );
-        emit Funded(scriptHash, msg.sender, value);
     }
 
     /**
@@ -258,7 +259,7 @@ contract Escrow {
         external
         view
         returns (bool)
-    {   
+    {
         bool voted = false;
 
         for (uint256 i = 0; i<transactions[scriptHash].noOfReleases; i++){
@@ -272,7 +273,7 @@ contract Escrow {
         }
 
         return voted;
-        
+
     }
 
     /**
@@ -328,15 +329,15 @@ contract Escrow {
             transactions[scriptHash].tokenAddress
         );
 
-        require(
-            token.transferFrom(msg.sender, address(this), value),
-            "Token transfer failed, maybe you did not approve the escrow contract to spend on behalf of the buyer"
-        );
-
         transactions[scriptHash].value = transactions[scriptHash].value
             .add(value);
 
         emit FundAdded(scriptHash, msg.sender, value);
+
+        require(
+            token.transferFrom(msg.sender, address(this), value),
+            "Token transfer failed, maybe you did not approve the escrow contract to spend on behalf of the buyer"
+        );
     }
 
     /**
@@ -403,38 +404,38 @@ contract Escrow {
             noOfReleases.add(1);
 
         transactions[scriptHash].released = _transferFunds(
-            scriptHash, 
-            destinations, 
+            scriptHash,
+            destinations,
             amounts
         ).add(transactions[scriptHash].released);
-        
-        require(
-            transactions[scriptHash].value >= transactions[scriptHash].released, 
-            "Value of transacation should be greater than released value"
-        );
 
         emit Executed(scriptHash, destinations, amounts);
+
+        require(
+            transactions[scriptHash].value >= transactions[scriptHash].released,
+            "Value of transacation should be greater than released value"
+        );
     }
 
-    /** 
+    /**
     * @dev Returns transaction hash which signers need to sign
     * @param scriptHash Script hash of the transaction
     * @param destinations List of addresses who will receive funds
     * @param amounts amount released to each destination
     */
     function getTransactionHash(
-        bytes32 scriptHash, 
-        address payable[] memory destinations, 
+        bytes32 scriptHash,
+        address payable[] memory destinations,
         uint256[] memory amounts
-    ) 
-        public 
-        view 
+    )
+        public
+        view
         returns(bytes32)
-    {   
+    {
 
         bytes32 releaseHash = keccak256(
             abi.encode(
-                keccak256(abi.encodePacked(destinations)), 
+                keccak256(abi.encodePacked(destinations)),
                 keccak256(abi.encodePacked(amounts))
             )
         );
@@ -552,11 +553,11 @@ contract Escrow {
             else if (
                 !transactions[scriptHash].voted[keccak256(
                     abi.encodePacked(
-                        transactions[scriptHash].seller, 
+                        transactions[scriptHash].seller,
                         transactions[scriptHash].noOfReleases
                     )
                 )]
-            ) 
+            )
             {
                 revert("Min number of sigs not present and seller did not sign");
             }
@@ -657,8 +658,8 @@ contract Escrow {
         require(sigR.length == sigV.length, "R,V length mismatch");
 
         bytes32 txHash = getTransactionHash(
-            scriptHash, 
-            destinations, 
+            scriptHash,
+            destinations,
             amounts
         );
 
@@ -670,10 +671,10 @@ contract Escrow {
                 sigR[i],
                 sigS[i]
             );
-            
+
             bytes32 addressHash = keccak256(
                 abi.encodePacked(
-                    recovered, 
+                    recovered,
                     transactions[scriptHash].noOfReleases
                 )
             );
