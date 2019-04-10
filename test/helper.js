@@ -57,12 +57,28 @@ const createSigs = (signers, multisigAddr, destinationAddr, value, scriptHash) =
     }
     return {sigV: sigV, sigR: sigR, sigS: sigS}
 
+}
+
+const signMessageHash = (hash, signers) => {
+  let sigV = []
+  let sigR = []
+  let sigS = []
+
+  for (var i=0; i<signers.length; i++) {
+    let sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signers[i])
+  
+    sigV.push(sig.v)
+    sigR.push('0x' + sig.r.toString('hex'))
+    sigS.push('0x' + sig.s.toString('hex'))
   }
+  return {sigV: sigV, sigR: sigR, sigS: sigS}
+}
+
 const resetTime = async()=>{
     await web3.currentProvider.send({
         jsonrpc: '2.0', 
         method: 'evm_mine', 
-        params: [new Date().getTime()/1000], 
+        params: [Math.floor(new Date().getTime()/1000)], 
         id: new Date().getTime()
       }, function(err, result){
     });
@@ -131,5 +147,6 @@ module.exports = {
     createSigs,
     increaseTime,
     setupWallet,
-    keccak256
+    keccak256,
+    signMessageHash
 };

@@ -1,8 +1,5 @@
 var ContractManager = artifacts.require("ContractManager");
-var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
-var EscrowWithoutToken = artifacts.require("EscrowWithoutToken");
-
-var util = require("ethereumjs-util");
+var Escrow = artifacts.require("Escrow");
 
 contract("Contract Manager contract", function(accounts) {
   var ownerAccount = accounts[0];
@@ -20,7 +17,7 @@ contract("Contract Manager contract", function(accounts) {
   });
 
   it("Add version v1.0 for escrow contract", async () => {
-    var escrowVersion1_0 = await EscrowWithoutToken.new();
+    var escrowVersion1_0 = await Escrow.new();
 
     var contractName = contracts[0];
     var version = versions[0][0];
@@ -94,7 +91,7 @@ contract("Contract Manager contract", function(accounts) {
   });
 
   it("Add version v1.1 for escrow contract", async () => {
-    var escrowVersion1_1 = await Escrow_v1_0.new();
+    var escrowVersion1_1 = await Escrow.new();
 
     var contractName = contracts[0];
     var version = versions[0][1];
@@ -166,7 +163,7 @@ contract("Contract Manager contract", function(accounts) {
   });
 
   it("Add version v1.1 again for escrow contract", async () => {
-    var escrowVersion1_1 = await Escrow_v1_0.new();
+    var escrowVersion1_1 = await Escrow.new();
 
     var contractName = contracts[0];
     var version = versions[0][1];
@@ -190,7 +187,7 @@ contract("Contract Manager contract", function(accounts) {
   });
 
   it("Add version with empty contract name", async () => {
-    var escrowVersion1_1 = await Escrow_v1_0.new();
+    var escrowVersion1_1 = await Escrow.new();
 
     var contractName = "";
     var version = versions[0][1];
@@ -214,7 +211,7 @@ contract("Contract Manager contract", function(accounts) {
   });
 
   it("Add version with empty version name", async () => {
-    var escrowVersion1_1 = await Escrow_v1_0.new();
+    var escrowVersion1_1 = await Escrow.new();
 
     var contractName = contracts[0];
     var version = "";

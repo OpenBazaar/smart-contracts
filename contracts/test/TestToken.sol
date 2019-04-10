@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 /**
@@ -143,8 +143,8 @@ contract TestToken is StandardToken {
      */
     constructor(
         uint256 initialSupply,
-        string tokenName,
-        string tokenSymbol) public {
+        string memory tokenName,
+        string memory tokenSymbol) public {
         totalSupply = initialSupply.mul( 10 ** uint256(decimals)); //Update total supply with the decimal amount
         name = tokenName;
         symbol = tokenSymbol;

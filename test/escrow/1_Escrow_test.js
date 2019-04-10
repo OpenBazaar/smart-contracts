@@ -1,5 +1,6 @@
-var Escrow_v1_0 = artifacts.require("Escrow_v1_0");
+var Escrow = artifacts.require("Escrow");
 var TestToken = artifacts.require("TestToken");
+var EscrowProxy = artifacts.require("EscrowProxy");
 
 var Web3 = require("web3");
 var web3 = new Web3("http://localhost:8555");
@@ -7,7 +8,7 @@ var BigNumber = require('bignumber.js');
 
 var helper = require("../helper.js");
 
-contract("Escrow Contract Version 1- Supports Token transfer", function() {
+contract("Escrow Contract", function() {
 
   let acct;
   var repeatedScriptHash;
@@ -17,15 +18,16 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     
     acct = await helper.setupWallet();
 
-    this.escrow = await Escrow_v1_0.new({from:acct[0]});
+    this.escrow = await Escrow.new({from:acct[0]});
     this.token = await TestToken.new(1000000000000000, "Open Bazaar", "OB", {from:acct[0]});
+    this.escrowProxy = await EscrowProxy.new("0x0000000000000000000000000000000000000000");
        
 });
 
     it("Add new transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -53,7 +55,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was not sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -72,7 +74,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -83,8 +85,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new 1-of-2 multisig escrow transaction with moderator address as zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x0000000000000000000000000000000000000000";
         var threshold = 1;
         var timeoutHours = 6;
@@ -113,7 +115,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -132,7 +134,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -143,9 +145,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new 1-of-2 multisig escrow transaction with moderator address as non-zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[3];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[3]);
         var threshold = 1;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -173,7 +175,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -192,7 +194,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedTimeoutHours = transaction[5];
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -203,9 +205,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add funds to ETHER transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -233,7 +235,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.valueAdded;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "FundAdded", "FundAdded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -246,15 +248,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var transaction = await this.escrow.transactions(scriptHash);
        
         var receivedAmount = transaction[0];
-       
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedAmount.toNumber(), Number(amount) +Number(amount), "Received amount does not match the amount sent");
        
     });
 
     it("Add funds to ETHER transaction from non-buyer account", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -278,9 +280,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with same buyer and seller", async()=>{
-        var buyer = acct[0];
-        var seller = acct[0];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[0]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -300,9 +302,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with 0 value", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -322,9 +324,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with threshold greater than number of parties involved", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 4;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -344,9 +346,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with threshold 0", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 0;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -366,8 +368,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with moderator being one of the buyer or seller", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = buyer;
         var threshold = 2;
         var timeoutHours = 6;
@@ -389,8 +391,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
     it("Add new transaction with buyer being zero address", async()=>{
         var buyer = "0x";
-        var seller = acct[1];
-        var moderator = acct[2];
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -410,9 +412,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with seller being zero address", async()=>{
-        var buyer = acct[0];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
         var seller = "0x";
-        var moderator = acct[2];
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -432,8 +434,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with moderator being zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x";
         var threshold = 2;
         var timeoutHours = 6;
@@ -454,9 +456,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new transaction with previously added script hash", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;        
         var amount = web3.utils.toWei("1", "ether");        
@@ -494,7 +496,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
         moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore);
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
@@ -537,7 +540,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
-        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [seller]);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -577,7 +581,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
-        var sig = helper.createSigs([buyer], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [buyer]);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -617,7 +622,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
-        var sig = helper.createSigs([moderator], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [moderator]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
@@ -643,8 +649,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
             assert.equal(true, false, "Should not be able to execute transaction with scripthash that does not exist in the contract");
@@ -655,7 +662,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         }
     });
 
-    it("Execute already executed Transaction", async()=>{
+    it("Execute already executed Transaction where all funds are released", async()=>{
         var buyer = acct[0];
         var seller = acct[1];
         var moderator = acct[2];
@@ -669,7 +676,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
  
@@ -684,9 +692,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add Transaction with wrong unique id", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 3;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -719,7 +727,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [web3.utils.toWei("0.8", "ether"), amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [web3.utils.toWei("0.8", "ether"), amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
+
         uniqueId = helper.getUniqueId();
 
         try{
@@ -745,6 +755,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller]);
 
         var sig = helper.createSigs([buyer, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
 
@@ -772,7 +785,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, acct[4]], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, acct[4]]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -798,7 +812,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [acct[4], moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [acct[4], moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -824,11 +839,39 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
-
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
+        
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
             assert.equal(true, false, "Should not be able to execute transaction with total value being sent greater than overall transaction value");
+
+        }catch(error){
+            assert.notInclude(error.toString(), 'AssertionError', error.message);
+
+        }
+    });
+
+    it("Execute Transaction with duplicate signatures", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.9", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, seller]);
+
+        try{
+            await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+            assert.equal(true, false, "Should not be able to execute transaction with duplicate signatures!!");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
@@ -847,20 +890,76 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
         var scriptHash = helper.getScriptHash(redeemScript);
         var amountToBeGivenToSeller = web3.utils.toWei("0.8", "ether");
-        var amountToBeGivenToModerator = web3.utils.toWei("0.1", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.2", "ether");
+        var released = Number(amountToBeGivenToModerator) + Number(amountToBeGivenToSeller);
 
-        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("2", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var transaction = await this.escrow.transactions(scriptHash);
+
+        var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
+
+        assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(1, Number(noOfReleases), "Number of releases by now should be 1");
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var transaction = await this.escrow.transactions(scriptHash);
+
+        var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
+
+        assert.equal(released * 2, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(2, Number(noOfReleases), "Number of releases by now should be 2");
+
+    });
+
+    it("Execute Transaction with same signature being sent twice", async()=>{
+        var buyer = acct[0];
+        var seller = acct[1];
+        var moderator = acct[2];
+        var threshold = 3;
+        var timeoutHours = 6;
+        var uniqueId = helper.getUniqueId();
+        var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address);
+        var scriptHash = helper.getScriptHash(redeemScript);
+        var amountToBeGivenToSeller = web3.utils.toWei("0.8", "ether");
+        var amountToBeGivenToModerator = web3.utils.toWei("0.2", "ether");
+        var released = Number(amountToBeGivenToModerator) + Number(amountToBeGivenToSeller);
+
+        await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("2", "ether")});
+
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
+
+
+        await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+
+        var transaction = await this.escrow.transactions(scriptHash);
+
+        var releasedAmount = transaction[10];
+        var noOfReleases = transaction[11];
+
+        assert.equal(released, Number(releasedAmount), "Amount sent to release and released amounts must match!!");
+        assert.equal(1, Number(noOfReleases), "Number of releases by now should be 1");
+        
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
-            assert.equal(true, false, "Should not be able to execute transaction with total value being released smaller than overall transaction value");
+            assert.equal(true, false, "Should not be able to execute transaction with same old signature");
 
         }catch(error){
             assert.notInclude(error.toString(), 'AssertionError', error.message);
 
         }
+
     });
 
     it("Execute Transaction with one of the sent amount being 0", async()=>{
@@ -877,7 +976,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -903,7 +1003,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -929,7 +1030,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
@@ -961,8 +1063,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
-        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
-        
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [seller]);
+
         //simulate timeout
         await helper.increaseTime(6 * 60 * 60 + 10);
 
@@ -998,8 +1101,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-
-        var sig = helper.createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [buyer], [amountToBeGivenToBuyer]);
+        var sig = helper.signMessageHash(txHash, [buyer]);
         
         //simulate timeout
         await helper.increaseTime(6 * 60 * 60 + 10);
@@ -1030,8 +1133,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-
-        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [seller]);
         
         //simulate timeout
         await helper.increaseTime(4 * 60 * 60);
@@ -1066,7 +1169,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
         buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
 
-        var sig = helper.createSigs([buyer], this.escrow.address, [buyer], [amountToBeGivenToBuyer], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [buyer], [amountToBeGivenToBuyer]);
+        var sig = helper.signMessageHash(txHash, [buyer]);
 
         var txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [buyer], [amountToBeGivenToBuyer]);
 
@@ -1089,9 +1193,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
 
     it("Add new Token transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1101,8 +1205,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1112,14 +1216,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1139,7 +1243,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1153,8 +1257,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add 1-of-2 Token transaction with moderator address as zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
         var moderator = "0x0000000000000000000000000000000000000000";
         var threshold = 1;
         var timeoutHours = 6;
@@ -1165,8 +1269,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1176,14 +1280,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1203,7 +1307,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1217,9 +1321,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add 1-of-2 Token transaction with moderator address as non-zero address", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[3];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[3]);
         var threshold = 1;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1229,8 +1333,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var redeemScript = helper.generateRedeemScript(uniqueId, threshold, timeoutHours, buyer, seller, moderator, this.escrow.address, this.token.address);
         var scriptHash = helper.getScriptHash(redeemScript);
@@ -1240,14 +1344,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.value;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "Funded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1267,7 +1371,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount), "Received amount does not match the amount sent");
@@ -1282,9 +1386,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
 
     it("Add funds to Token transaction", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1301,8 +1405,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceBefore = await this.token.balanceOf(buyer);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        buyerBalanceBefore = new BigNumber(buyerBalanceBefore.toNumber());
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
+        buyerBalanceBefore = new BigNumber(buyerBalanceBefore);
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
 
         var txResult = await this.token.approve(this.escrow.address, amount, {from:buyer});
         txResult = await this.escrow.addTokensToTransaction(scriptHash, amount,{from:buyer});
@@ -1310,14 +1414,14 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var buyerBalanceAfter = await this.token.balanceOf(buyer);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        buyerBalanceAfter = new BigNumber(buyerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        buyerBalanceAfter = new BigNumber(buyerBalanceAfter);
         
         var eventName = txResult.logs[0].event;
         var from = txResult.logs[0].args.from;
         var receivedScriptHash = txResult.logs[0].args.scriptHash;
         var amountEscrowed = txResult.logs[0].args.valueAdded;
-
+        amountEscrowed = new BigNumber(amountEscrowed);
         assert.equal(eventName, "FundAdded", "Funded event should be fired");
         assert.equal(from, buyer, "Transaction was sent from buyer's address: "+ buyer);
         assert.equal(receivedScriptHash, scriptHash, "Received script hash does not match the script hash sent");
@@ -1337,7 +1441,7 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var receivedThreshold = transaction[4];
         var receivedTransactionType = transaction[3];
         var receivedTokenAddress = transaction[8];
-
+        receivedAmount = new BigNumber(receivedAmount);
         assert.equal(receivedBuyer, buyer, "Received buyer does not match the buyer sent");
         assert.equal(receivedSeller, seller, "Received seller does not match the seller sent");
         assert.equal(receivedAmount.toNumber(), Number(amount) + Number(amount), "Received amount does not match the amount sent");
@@ -1351,9 +1455,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add funds to Token transaction from non-buyer's account", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1380,9 +1484,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new Token transaction without apporving the escrow contract to transfer required amount of tokens on behalf of sender", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1404,9 +1508,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
     });
 
     it("Add new Token transaction by approving less amount of tokens then required", async()=>{
-        var buyer = acct[0];
-        var seller = acct[1];
-        var moderator = acct[2];
+        var buyer = web3.utils.toChecksumAddress(acct[0]);
+        var seller = web3.utils.toChecksumAddress(acct[1]);
+        var moderator = web3.utils.toChecksumAddress(acct[2]);
         var threshold = 2;
         var timeoutHours = 6;
         var uniqueId = helper.getUniqueId();
@@ -1443,16 +1547,17 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         var txResult = await this.token.approve(this.escrow.address, web3.utils.toWei("100", "ether"), {from:buyer});
         txResult = await this.escrow.addTokenTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash,web3.utils.toWei("100", "ether"), uniqueId, this.token.address, {from:acct[0]});
-                
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
         
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
         var moderatorBalanceBefore = await this.token.balanceOf(moderator);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
-        moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
+        moderatorBalanceBefore = new BigNumber(moderatorBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
@@ -1466,9 +1571,9 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
         var moderatorBalanceAfter = await this.token.balanceOf(moderator);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
-        moderatorBalanceAfter = new BigNumber(moderatorBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
+        moderatorBalanceAfter = new BigNumber(moderatorBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(moderatorBalanceBefore.plus(Number(amountToBeGivenToModerator)).toNumber(), moderatorBalanceAfter.toNumber(), "Moderator's token balance must increase by : "+amountToBeGivenToModerator);
@@ -1489,14 +1594,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         var txResult = await this.token.approve(this.escrow.address, web3.utils.toWei("100", "ether"), {from:buyer});
         txResult = await this.escrow.addTokenTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash,web3.utils.toWei("100", "ether"), uniqueId, this.token.address, {from:acct[0]});
-                
-        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [seller]);
         
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -1509,8 +1615,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must reduce by escrowed amount");
@@ -1530,14 +1636,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         var txResult = await this.token.approve(this.escrow.address, web3.utils.toWei("100", "ether"), {from:buyer});
         txResult = await this.escrow.addTokenTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash,web3.utils.toWei("100", "ether"), uniqueId, this.token.address, {from:acct[0]});
-                
-        var sig = helper.createSigs([seller], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [seller]);
         
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         txResult = await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
 
@@ -1550,8 +1657,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
         var sellerBalanceAfter = await this.token.balanceOf(seller);
         var escrowContractBalanceAfter = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter.toNumber());
-        sellerBalanceAfter = new BigNumber(sellerBalanceAfter.toNumber());
+        escrowContractBalanceAfter = new BigNumber(escrowContractBalanceAfter);
+        sellerBalanceAfter = new BigNumber(sellerBalanceAfter);
 
         assert.equal(sellerBalanceBefore.plus(Number(amountToBeGivenToSeller)).toNumber(), sellerBalanceAfter.toNumber(), "Seller's token balance must increase by : "+amountToBeGivenToSeller);
         assert.equal(escrowContractBalanceBefore.minus(Number(amountToBeGivenToSeller)).toNumber(), escrowContractBalanceAfter.toNumber(), "Escrow contract's token balance must reduce by escrowed amount");
@@ -1571,14 +1678,15 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         var txResult = await this.token.approve(this.escrow.address, web3.utils.toWei("100", "ether"), {from:buyer});
         txResult = await this.escrow.addTokenTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash,web3.utils.toWei("100", "ether"), uniqueId, this.token.address, {from:acct[0]});
-                
-        var sig = helper.createSigs([moderator], this.escrow.address, [seller], [amountToBeGivenToSeller], scriptHash);
+        
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller], [amountToBeGivenToSeller]);
+        var sig = helper.signMessageHash(txHash, [moderator]);
         
         var sellerBalanceBefore = await this.token.balanceOf(seller);
         var escrowContractBalanceBefore = await this.token.balanceOf(this.escrow.address);
 
-        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore.toNumber());
-        sellerBalanceBefore = new BigNumber(sellerBalanceBefore.toNumber());
+        escrowContractBalanceBefore = new BigNumber(escrowContractBalanceBefore);
+        sellerBalanceBefore = new BigNumber(sellerBalanceBefore);
 
         try{
             await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller], [amountToBeGivenToSeller]);
@@ -1605,7 +1713,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller, moderator], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller, moderator]);
 
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
@@ -1632,7 +1741,8 @@ contract("Escrow Contract Version 1- Supports Token transfer", function() {
 
         await this.escrow.addTransaction(buyer, seller, moderator, threshold, timeoutHours, scriptHash, uniqueId, {from:acct[0], value:web3.utils.toWei("1", "ether")});
 
-        var sig = helper.createSigs([buyer, seller], this.escrow.address, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator], scriptHash);
+        var txHash = await this.escrowProxy.getTransactionHash(this.escrow.address, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
+        var sig = helper.signMessageHash(txHash, [buyer, seller]);
 
         await this.escrow.execute(sig.sigV, sig.sigR, sig.sigS, scriptHash, [seller, moderator], [amountToBeGivenToSeller, amountToBeGivenToModerator]);
 
