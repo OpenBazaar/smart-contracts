@@ -167,7 +167,6 @@ contract Escrow {
         );
 
         emit Funded(scriptHash, msg.sender, msg.value);
-
     }
 
     /**
@@ -205,7 +204,6 @@ contract Escrow {
         nonZeroAddress(seller)
         nonZeroAddress(tokenAddress)
     {
-
         _addTransaction(
             buyer,
             seller,
@@ -262,7 +260,7 @@ contract Escrow {
     {
         bool voted = false;
 
-        for (uint256 i = 0; i<transactions[scriptHash].noOfReleases; i++){
+        for (uint256 i = 0; i < transactions[scriptHash].noOfReleases; i++){
 
             bytes32 addressHash = keccak256(abi.encodePacked(party, i));
 
@@ -273,7 +271,6 @@ contract Escrow {
         }
 
         return voted;
-
     }
 
     /**
@@ -295,7 +292,6 @@ contract Escrow {
         onlyBuyer(scriptHash)
 
     {
-
         require(msg.value > 0, "Value must be greater than zero.");
 
         transactions[scriptHash].value = transactions[scriptHash].value
@@ -322,7 +318,6 @@ contract Escrow {
         checkTransactionType(scriptHash, TransactionType.TOKEN)
         onlyBuyer(scriptHash)
     {
-
         require(value > 0, "Value must be greater than zero.");
 
         ITokenContract token = ITokenContract(
@@ -377,7 +372,6 @@ contract Escrow {
         transactionExists(scriptHash)
         fundsExists(scriptHash)
     {
-
         require(
             destinations.length > 0,
             "Number of destinations must be greater than 0"
@@ -431,9 +425,8 @@ contract Escrow {
     )
         public
         view
-        returns(bytes32)
+        returns (bytes32)
     {
-
         bytes32 releaseHash = keccak256(
             abi.encode(
                 keccak256(abi.encodePacked(destinations)),
@@ -610,7 +603,7 @@ contract Escrow {
 
             ITokenContract token = ITokenContract(t.tokenAddress);
 
-            for (uint256 j = 0; j<destinations.length; j++) {
+            for (uint256 j = 0; j < destinations.length; j++) {
 
                 require(
                     destinations[j] != address(0),

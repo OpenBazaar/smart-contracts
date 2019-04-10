@@ -3,7 +3,7 @@ pragma solidity 0.5.4;
 import "./IEscrow.sol";
 
 
-/** 
+/**
 * @dev This contract is used as proxy to return the hash which needs to be signed
 * For our current audited version of Escrow contract Proxy will contain code to generate hash
 * For all other furture Escrow contract versions, the version in itself should contain a function
@@ -14,12 +14,11 @@ contract EscrowProxy {
     address public legacyEscrowVersion;
 
     constructor(address _legacyEscrowVersion) public {
-
         //empty address allowed in case of no legacy contract
         legacyEscrowVersion = _legacyEscrowVersion;
     }
 
-    /** 
+    /**
     * @dev Return Transaction has for the given input
     * For our current audited version of Escrow contract Proxy will contain code to generate hash
     * For all other furture Escrow contract versions, the version in itself should contain a function
@@ -30,18 +29,17 @@ contract EscrowProxy {
     * @param amounts Amount distributed to each receiver
     */
     function getTransactionHash(
-        address escrowVersion, 
-        bytes32 scriptHash, 
-        address[] calldata destinations, 
+        address escrowVersion,
+        bytes32 scriptHash,
+        address[] calldata destinations,
         uint256[] calldata amounts
-    ) 
+    )
         external
-        view 
-        returns(bytes32) 
-    {   
-
+        view
+        returns (bytes32)
+    {
         require(
-            escrowVersion != address(0), 
+            escrowVersion != address(0),
             "Invalid escrow contract version!!"
         );
         //if legacy version of escrow is called than
@@ -66,17 +64,16 @@ contract EscrowProxy {
                 amounts
             );
         }
-
     }
 
     function _legacyEscrowTxHash(
-        bytes32 scriptHash, 
-        address[] memory destinations, 
+        bytes32 scriptHash,
+        address[] memory destinations,
         uint256[] memory amounts
     )
         private
         view
-        returns(bytes32)
+        returns (bytes32)
     {
         bytes32 txHash = keccak256(
             abi.encodePacked(
@@ -96,5 +93,5 @@ contract EscrowProxy {
 
         return txHash;
     }
-    
+
 }
