@@ -13,7 +13,7 @@ import "../token/ITokenContract.sol";
 * @dev Do not use this contract with tokens that do not strictly adhere to the
 * ERC20 token standard. In particular, all successful calls to `transfer` and
 * `transferFrom` on the token contract MUST return true. Non-compliant tokens
-* may get trapped in this contract forever. See the sepcification for more
+* may get trapped in this contract forever. See the specification for more
 * details.
 */
 contract Escrow {
@@ -426,14 +426,14 @@ contract Escrow {
 
         require(
             transactions[scriptHash].value >= transactions[scriptHash].released,
-            "Value of transacation should be greater than released value"
+            "Value of transaction should be greater than released value"
         );
     }
 
     /**
     * @notice Gives the hash that the parties need to sign in order to
     * release funds from the escrow of a given OpenBazaar transactions given
-    * a set of desitnations and amounts
+    * a set of destinations and amounts
     * @param scriptHash Script hash of the OpenBazaar transaction
     * @param destinations List of addresses who will receive funds
     * @param amounts List of amounts for each destination
@@ -674,7 +674,7 @@ contract Escrow {
     * @param scriptHash ScriptHash of the transaction
     * @param destinations List of addresses who will receive funds
     * @param amounts List of amounts to be released to the destinations
-    * @dev This also records which addresses have sucessfully signed
+    * @dev This also records which addresses have successfully signed
     * @dev This function SHOULD NOT be called by ANY function other than
     * `_verifyTransaction`
     */
@@ -752,7 +752,7 @@ contract Escrow {
 
     /**
     * @dev Private method for adding a new OpenBazaar transaction to the
-    * contract. Used to reduce code redundnacy
+    * contract. Used to reduce code redundancy
     * @param buyer The buyer associated with the OpenBazaar transaction
     * @param seller The seller associated with the OpenBazaar transaction
     * @param moderator The moderator (if any) associated with the OpenBazaar
