@@ -3,6 +3,7 @@ pragma solidity 0.5.4;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../token/ITokenContract.sol";
 
+
 /**
 * @title OpenBazaar Escrow
 * @author OB1
@@ -89,7 +90,7 @@ contract Escrow {
         _;
     }
 
-    modifier fundsExists(bytes32 scriptHash) {
+    modifier fundsExist(bytes32 scriptHash) {
         require(
             transactions[scriptHash].value.sub(transactions[scriptHash].released) > 0,
             "All funds has been released"
@@ -387,7 +388,7 @@ contract Escrow {
     )
         external
         transactionExists(scriptHash)
-        fundsExists(scriptHash)
+        fundsExist(scriptHash)
     {
         require(
             destinations.length > 0,
