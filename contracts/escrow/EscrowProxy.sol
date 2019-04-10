@@ -4,10 +4,14 @@ import "./IEscrow.sol";
 
 
 /**
-* @dev This contract is used as proxy to return the hash which needs to be signed
-* For our current audited version of Escrow contract Proxy will contain code to generate hash
-* For all other furture Escrow contract versions, the version in itself should contain a function
-* And proxy will only be calling that function
+* @title Escrow Proxy
+* @author OB1
+* @notice This a proxy contract used to return hashes that need to be signed in
+* order for funds to be released from a given version of the escrow contract
+* @dev For v1.0.0 of the escrow contract this proxy will generate the hash
+* that needs to be signed in order to release funds from escrow. For all later
+* versions of the escrow contract, the escrow contract itself should have such
+* a function.
 */
 contract EscrowProxy {
 
@@ -19,14 +23,15 @@ contract EscrowProxy {
     }
 
     /**
-    * @dev Return Transaction has for the given input
-    * For our current audited version of Escrow contract Proxy will contain code to generate hash
-    * For all other furture Escrow contract versions, the version in itself should contain a function
-    * And proxy will only be calling that function
-    * @param escrowVersion The version of the escrow contract for which this trade is executed
-    * @param scriptHash script hash of the transaction
-    * @param destinations Receivers of the funds
-    * @param amounts Amount distributed to each receiver
+    * @notice Gets that hash that must be signed to release funds from escrow
+    * for a given OpenBazaar transaction, set of destinations, set of amounts,
+    * and version of the escrow contract
+    * @param escrowVersion The address of the escrow contract being used for
+    * the OpenBazaar tansaction in question
+    * @param scriptHash The scriptHash of the OpenBazaar transaction
+    * @param destinations List of addresses who will receive funds
+    * @param amounts List of amounts to be released to the destinations
+    * @return a bytes32 hash to sign
     */
     function getTransactionHash(
         address escrowVersion,
@@ -66,6 +71,15 @@ contract EscrowProxy {
         }
     }
 
+    /**
+    * @notice Gets that hash that must be signed to release funds from escrow
+    * for a given OpenBazaar transaction, set of destinations, set of amounts,
+    * and version 1.0.0 of the escrow contract
+    * @param scriptHash The scriptHash of the OpenBazaar transaction
+    * @param destinations List of addresses who will receive funds
+    * @param amounts List of amounts to be released to the destinations
+    * @return a bytes32 hash to sign
+    */
     function _legacyEscrowTxHash(
         bytes32 scriptHash,
         address[] memory destinations,
