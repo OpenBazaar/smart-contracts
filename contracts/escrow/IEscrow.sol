@@ -19,9 +19,9 @@ interface IEscrow {
         );
 
     function addTransaction(
-        address _buyer,
-        address _seller,
-        address _moderator,
+        address buyer,
+        address seller,
+        address moderator,
         uint8 threshold,
         uint32 timeoutHours,
         bytes32 scriptHash,
@@ -30,21 +30,25 @@ interface IEscrow {
         external payable;
 
     function addTokenTransaction(
-        address _buyer,
-        address _seller,
-        address _moderator,
+        address buyer,
+        address seller,
+        address moderator,
         uint8 threshold,
         uint32 timeoutHours,
         bytes32 scriptHash,
         uint256 value,
         bytes20 uniqueId,
-        address _tokenAddress
+        address tokenAddress
     )
         external;
 
-    function addFundsToTransaction(bytes32 scriptHash)external payable;
+    function addFundsToTransaction(bytes32 scriptHash) external payable;
 
-    function addTokensToTransaction(bytes32 scriptHash, uint256 value)external;
+    function addTokensToTransaction(
+        bytes32 scriptHash,
+        uint256 value
+    )
+        external;
 
     function execute(
         uint8[] calldata sigV,
@@ -62,7 +66,7 @@ interface IEscrow {
     )
         external
         view
-        returns(bool check);
+        returns (bool);
 
     function checkVote(
         bytes32 scriptHash,
@@ -70,14 +74,34 @@ interface IEscrow {
     )
         external
         view
-        returns(bool vote);
+        returns (bool);
 
     function getTransactionHash(
-        bytes32 scriptHash, 
-        address[] calldata destinations, 
+        bytes32 scriptHash,
+        address[] calldata destinations,
         uint256[] calldata amounts
     )
         external
         view
-        returns(bytes32);
+        returns (bytes32);
+
+    function getAllTransactionsForParty(
+        address partyAddress
+    )
+        external
+        view
+        returns (bytes32[] memory);
+
+    function calculateRedeemScriptHash(
+        bytes20 uniqueId,
+        uint8 threshold,
+        uint32 timeoutHours,
+        address buyer,
+        address seller,
+        address moderator,
+        address tokenAddress
+    )
+        external
+        view
+        returns (bytes32);
 }
