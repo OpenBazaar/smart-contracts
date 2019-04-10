@@ -44,30 +44,30 @@ contract Escrow {
 
     struct Transaction {
         uint256 value;
-        uint256 lastModified; //time txn was last modified (in seconds)
+        uint256 lastModified;
         Status status;
         TransactionType transactionType;
         uint8 threshold;
         uint32 timeoutHours;
         address buyer;
         address seller;
-        address tokenAddress; //token address in case of token transfer
+        address tokenAddress; //address of ERC20 token if applicable
         address moderator;
         uint256 released;
-        //Number of times execution took place. More like a nonce
-        uint256 noOfReleases;
-        mapping(address => bool) isOwner; //to keep track of owners.
-        //to keep track of who all voted in latest transaction execution.
-        //This list will be refreshed with every execution
+        uint256 noOfReleases; //number of times funds have been released
+        mapping(address => bool) isOwner;
+        //tracks who has authorized release of funds from escrow
         mapping(bytes32 => bool) voted;
-        mapping(address => bool) beneficiaries; //beneficiaries of execution
+        //tracks who has received funds released from escrow
+        mapping(address => bool) beneficiaries;
     }
 
     mapping(bytes32 => Transaction) public transactions;
 
     uint256 public transactionCount = 0;
 
-    //Contains mapping between each party and all of their transactions
+    //maps address to array of scriptHashes of all OpenBazaar transacations for
+    //which they are either the buyer or the seller
     mapping(address => bytes32[]) private partyVsTransaction;
 
     modifier transactionExists(bytes32 scriptHash) {
@@ -409,10 +409,10 @@ contract Escrow {
         );
 
         transactions[scriptHash].status = Status.RELEASED;
-        //Last modified timestamp modified, which will be used by rewards
-        // solium-disable-next-line security/no-block-members
+
+        //solium-disable-next-line security/no-block-members
         transactions[scriptHash].lastModified = block.timestamp;
-        //Increment release conuter
+
         transactions[scriptHash].noOfReleases = transactions[scriptHash].
             noOfReleases.add(1);
 
@@ -455,7 +455,7 @@ contract Escrow {
             )
         );
 
-        // Follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
+        //follows ERC191 signature scheme: https://github.com/ethereum/EIPs/issues/191
         bytes32 txHash = keccak256(
             abi.encodePacked(
                 "\x19Ethereum Signed Message:\n32",
@@ -566,9 +566,9 @@ contract Escrow {
             transactions[scriptHash].lastModified
         );
 
-        //if the minimum number of signatures are not gathered and either
-        //timelock has not expired or transaction was not signed by seller
-        //then revert
+        //if the minimum number (`threshold`) of signatures are not present and
+        //either the timelock has not expired or the release was not signed by
+        //the seller then revert
         if (sigV.length < transactions[scriptHash].threshold) {
             if (!timeLockExpired) {
                 revert("Min number of sigs not present and timelock not expired");
@@ -743,7 +743,7 @@ contract Escrow {
         view
         returns (bool)
     {
-        // solium-disable-next-line security/no-block-members
+        //solium-disable-next-line security/no-block-members
         uint256 timeSince = block.timestamp.sub(lastModified);
         return (
             timeoutHours == 0 ? false : timeSince > uint256(timeoutHours).mul(1 hours)
@@ -786,16 +786,13 @@ contract Escrow {
         private
     {
         require(buyer != seller, "Buyer and seller are same");
-
-        //value passed should be greater than 0
         require(value > 0, "Value passed is 0");
-
-        // For now allowing 0 moderator to support 1-2 multisig wallet
         require(threshold > 0, "Threshold must be greater than 0");
         require(threshold <= 3, "Threshold must not be greater than 3");
 
-        //if threshold is 1 then moderator can be any address
-        //otherwise moderator should be a valid address
+        //when threshold is 1 that indicates the OpenBazaar transaction is not
+        //being moderated, so `moderator` can be any address
+        //if `threadhold > 1` then `moderator` should be nonzero address
         require(
             threshold == 1 || moderator != address(0),
             "Either threshold should be 1 or valid moderator address should be passed"
@@ -820,7 +817,7 @@ contract Escrow {
             moderator: moderator,
             value: value,
             status: Status.FUNDED,
-            // solium-disable-next-line security/no-block-members
+            //solium-disable-next-line security/no-block-members
             lastModified: block.timestamp,
             threshold: threshold,
             timeoutHours: timeoutHours,
@@ -839,8 +836,7 @@ contract Escrow {
             "Either buyer or seller is passed as moderator"
         );
 
-        //set moderator as one of the owners only if threshold is greater than
-        // 1 otherwise only buyer and seller should be able to release funds
+        //the moderator should be an owner only if `threshold > 1`
         if (threshold > 1) {
             transactions[scriptHash].isOwner[moderator] = true;
         }

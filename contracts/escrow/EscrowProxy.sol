@@ -18,12 +18,12 @@ contract EscrowProxy {
     address public legacyEscrowVersion;
 
     constructor(address _legacyEscrowVersion) public {
-        //empty address allowed in case of no legacy contract
+        //the zero address is allowed
         legacyEscrowVersion = _legacyEscrowVersion;
     }
 
     /**
-    * @notice Gets that hash that must be signed to release funds from escrow
+    * @notice Gets the hash that must be signed to release funds from escrow
     * for a given OpenBazaar transaction, set of destinations, set of amounts,
     * and version of the escrow contract
     * @param escrowVersion The address of the escrow contract being used for
@@ -47,20 +47,14 @@ contract EscrowProxy {
             escrowVersion != address(0),
             "Invalid escrow contract version!!"
         );
-        //if legacy version of escrow is called than
-        //calculate tx hash in this contract
-        if (escrowVersion == legacyEscrowVersion) {
 
+        if (escrowVersion == legacyEscrowVersion) {
             return _legacyEscrowTxHash(
                 scriptHash,
                 destinations,
                 amounts
             );
-
-        }
-        //If legacy version is not called
-        //then pass on the call to the escro contract version
-        else {
+        } else {
             IEscrow escrow = IEscrow(escrowVersion);
 
             return escrow.getTransactionHash(
@@ -72,7 +66,7 @@ contract EscrowProxy {
     }
 
     /**
-    * @notice Gets that hash that must be signed to release funds from escrow
+    * @notice Gets the hash that must be signed to release funds from escrow
     * for a given OpenBazaar transaction, set of destinations, set of amounts,
     * and version 1.0.0 of the escrow contract
     * @param scriptHash The scriptHash of the OpenBazaar transaction
