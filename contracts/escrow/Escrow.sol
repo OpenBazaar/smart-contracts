@@ -703,7 +703,7 @@ contract Escrow {
         // solium-disable-next-line security/no-block-members
         uint256 timeSince = block.timestamp.sub(lastModified);
         return (
-            timeoutHours == 0 ? false : timeSince > uint256(timeoutHours).mul(3600)
+            timeoutHours == 0 ? false : timeSince > uint256(timeoutHours).mul(1 hours)
         );
     }
 
@@ -783,7 +783,7 @@ contract Escrow {
         if (threshold > 1) {
             transactions[scriptHash].isOwner[moderator] = true;
         }
-        
+
         transactionCount++;
 
         partyVsTransaction[buyer].push(scriptHash);
