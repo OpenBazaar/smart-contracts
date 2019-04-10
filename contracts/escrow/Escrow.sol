@@ -398,6 +398,7 @@ contract Escrow {
 
         transactions[scriptHash].status = Status.RELEASED;
         //Last modified timestamp modified, which will be used by rewards
+        // solium-disable-next-line security/no-block-members
         transactions[scriptHash].lastModified = block.timestamp;
         //Increment release conuter
         transactions[scriptHash].noOfReleases = transactions[scriptHash].
@@ -699,7 +700,8 @@ contract Escrow {
         view
         returns (bool)
     {
-        uint256 timeSince = now.sub(lastModified);
+        // solium-disable-next-line security/no-block-members
+        uint256 timeSince = block.timestamp.sub(lastModified);
         return (
             timeoutHours == 0 ? false : timeSince > uint256(timeoutHours).mul(3600)
         );
@@ -757,6 +759,7 @@ contract Escrow {
             moderator: moderator,
             value: value,
             status: Status.FUNDED,
+            // solium-disable-next-line security/no-block-members
             lastModified: block.timestamp,
             threshold: threshold,
             timeoutHours: timeoutHours,
@@ -780,8 +783,7 @@ contract Escrow {
         if (threshold > 1) {
             transactions[scriptHash].isOwner[moderator] = true;
         }
-
-
+        
         transactionCount++;
 
         partyVsTransaction[buyer].push(scriptHash);
