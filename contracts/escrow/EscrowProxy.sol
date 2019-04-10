@@ -27,7 +27,7 @@ contract EscrowProxy {
     * for a given OpenBazaar transaction, set of destinations, set of amounts,
     * and version of the escrow contract
     * @param escrowVersion The address of the escrow contract being used for
-    * the OpenBazaar tansaction in question
+    * the OpenBazaar transaction in question
     * @param scriptHash The scriptHash of the OpenBazaar transaction
     * @param destinations List of addresses who will receive funds
     * @param amounts List of amounts to be released to the destinations
