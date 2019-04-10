@@ -12,6 +12,8 @@ OpenBazaar facilitates trades between arbitrary third parties on the internet. C
 
 When a buyer and seller have agreed on a product and a price, the buyer sends their funds to an escrow address, which is a 2-of-3 multisig address with one key controlled by the buyer, one key controlled by the seller, and one key controlled by a moderator that has been agreed upon by both the buyer and the seller.
 
+**IMPORTANT:** This contract requires _signatures_ in order to release funds from escrow. Contracts cannot create signatures corresponding to their own addresses. Therefore, you SHOULD NOT pass a contract address for the `buyer`, `seller`, or `moderator`. Doing so could make it impossible for your funds to be released from escrow.
+
 On the "happy path", the seller delivers the goods, then the buyer releases the funds to the seller (with the buyer and seller signing the payout txn from the escrow address).
 
 In the event that the seller does not deliver the goods as promised, the buyer pleads their case to the moderator, and the buyer & moderator can send the funds from escrow back to the buyer.
@@ -51,6 +53,8 @@ Funds released from escrow can be split up and sent to various addresses. Howeve
 Upon release of funds from escrow, the trade is put into the _RELEASED_ state. Once in the _RELEASED_ state, trades can no longer be altered. All participants who received some of the escrowed funds are noted in the trade's _Transaction_ struct (via the _beneficiaries_ mapping).
 
 (The _beneficiaries_ information will be used later, by other contracts, to determine whether or not a given trade was disputed, refunded, etc).
+
+If there are ever any funds left in escrow (even if the trade is in the _RELEASED_ state) the party's can call _execute_ to release the funds.
 
 ### Offline Direct Payments
 
