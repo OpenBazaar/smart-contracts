@@ -664,7 +664,7 @@ contract Escrow {
             amounts
         );
 
-        for (uint i = 0; i < sigR.length; i++) {
+        for (uint256 i = 0; i < sigR.length; i++) {
 
             address recovered = ecrecover(
                 txHash,
