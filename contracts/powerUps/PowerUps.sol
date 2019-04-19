@@ -3,23 +3,23 @@
 pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../token/ITokenContract.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
 
 /**
-* @dev 'Powering-up a listing' is spending OpenBazaar tokens to advertise a
+* @dev 'Powering-up a listing' is spending ETH to advertise a
 * listing in one of the OpenBazaar clients.
 */
-contract PowerUps {
+contract PowerUps is Pausable {
 
     using SafeMath for uint256;
 
-    ITokenContract public token;
+    address payable payoutAddress; // address that will receive funds
 
     struct PowerUp {
         string contentAddress; // IPFS/IPNS address, peerID, etc
-        uint256 tokensBurned; // total tokens burned towards this PowerUp
-        uint256 lastTopupTime; // last time tokens were burned for this PowerUp
+        uint256 ethSpent; // total ETH spent towards this PowerUp
+        uint256 lastTopupTime; // last time ETH was added to this PowerUp
         bytes32 keyword; // search term, reserved keyword, etc
     }
 
@@ -30,13 +30,13 @@ contract PowerUps {
     event NewPowerUpAdded(
         address indexed initiator,
         uint256 id, // the index of this PowerUp in the powerUps[] array
-        uint256 tokensBurned
+        uint256 ethSpent
     );
 
     event Topup(
         address indexed initiator,
         uint256 id, // the index of the PowerUp in the powerUps[] array
-        uint256 tokensBurned
+        uint256 ethSpent
     );
 
     modifier powerUpExists(uint256 id) {
@@ -49,28 +49,27 @@ contract PowerUps {
         _;
     }
 
-    constructor(address obTokenAddress) public nonZeroAddress(obTokenAddress) {
-        token = ITokenContract(obTokenAddress);
+    constructor(address payable _payoutAddress) public nonZeroAddress(_payoutAddress) {
+        payoutAddress = _payoutAddress;
     }
 
     /**
     * @dev Add new PowerUp
     * @param contentAddress IPFS/IPNS address, peerID, etc
-    * @param amount Amount of tokens to burn
     * @param keyword Bytes32 search term, reserved keyword, etc
     * @return id Index of the PowerUp in the powerUps[] array
     */
     function addPowerUp(
         string calldata contentAddress,
-        uint256 amount,
         bytes32 keyword
     )
         external
+        payable
+        whenNotPaused
         returns (uint256 id)
     {
-
         require(bytes(contentAddress).length > 0, "Content Address is empty");
-        id = _addPowerUp(contentAddress, amount, keyword);
+        id = _addPowerUp(contentAddress, msg.value, keyword);
 
         return id;
     }
@@ -83,7 +82,7 @@ contract PowerUps {
     * simply to allow the creation of multiple PowerUps with a single function
     * call.
     * @param contentAddress IPFS/IPNS address of the listing
-    * @param amounts Amount of tokens to be burnt for each PowerUp
+    * @param amounts Amount of ETH to be spent for each PowerUp
     * @param keywords Keywords in bytes32 form for each PowerUp
     * Be sure to keep arrays small enough so as not to exceed the block gas
     * limit.
@@ -94,6 +93,8 @@ contract PowerUps {
         bytes32[] calldata keywords
     )
         external
+        payable
+        whenNotPaused
         returns (uint256[] memory ids)
     {
 
@@ -109,39 +110,50 @@ contract PowerUps {
 
         ids = new uint256[](amounts.length);
 
+        uint256 amountsTotal = 0;
+
         for (uint256 i = 0; i < amounts.length; i++) {
             ids[i] = _addPowerUp(contentAddress, amounts[i], keywords[i]);
+            amountsTotal = amountsTotal.add(amounts[i]);
         }
+
+        require(amountsTotal == msg.value,
+            "Total of amounts[] must equal the amount of ETH sent"
+        );
 
         return ids;
     }
 
-/**
-    * @dev Topup a PowerUp's balance (that is, burn more tokens in association
-    * with am existing PowerUp)
+    /**
+    * @dev Topup a PowerUp's balance (that is, spend more ETH in association
+    * with an existing PowerUp)
     * @param id The index of the PowerUp in the powerUps array
-    * @param amount Amount of tokens to burn
     */
     function topUpPowerUp(
-        uint256 id,
-        uint256 amount
+        uint256 id
     )
         external
+        payable
+        whenNotPaused
         powerUpExists(id)
     {
-
         require(
-            amount > 0,
-            "Amount of tokens to burn should be greater than 0"
+            msg.value > 0,
+            "Amount of ETH sent should be greater than 0"
         );
 
-        powerUps[id].tokensBurned = powerUps[id].tokensBurned.add(amount);
+        powerUps[id].ethSpent = powerUps[id].ethSpent.add(msg.value);
 
         powerUps[id].lastTopupTime = block.timestamp;
 
-        token.burnFrom(msg.sender, amount);
+        emit Topup(msg.sender, id, msg.value);
+    }
 
-        emit Topup(msg.sender, id, amount);
+    /**
+    * @dev Allows anyone to transfer the contract's funds to the payoutAddress
+    */
+    function withdrawFunds() external {
+        payoutAddress.transfer(address(this).balance);
     }
 
     /**
@@ -155,23 +167,23 @@ contract PowerUps {
         view
         returns (
             string memory contentAddress,
-            uint256 tokensBurned,
+            uint256 ethSpent,
             uint256 lastTopupTime,
             bytes32 keyword
         )
     {
-        if (powerUps.length > id) {
+        require(id < powerUps.length,
+            "invalid id passed"
+        );
 
-            PowerUp storage powerUp = powerUps[id];
+        PowerUp storage powerUp = powerUps[id];
+        contentAddress = powerUp.contentAddress;
+        ethSpent = powerUp.ethSpent;
+        lastTopupTime = powerUp.lastTopupTime;
+        keyword = powerUp.keyword;
 
-            contentAddress = powerUp.contentAddress;
-            tokensBurned = powerUp.tokensBurned;
-            lastTopupTime = powerUp.lastTopupTime;
-            keyword = powerUp.keyword;
+        return (contentAddress, ethSpent, lastTopupTime, keyword);
 
-        }
-
-        return (contentAddress, tokensBurned, lastTopupTime, keyword);
     }
 
     /**
@@ -192,7 +204,7 @@ contract PowerUps {
     * @dev returns the id (index in the powerUps[] array) of the PowerUp
     * refered to by the `index`th element of a given `keyword` array.
     * ie: getPowerUpIdAtIndex("shoes",23) will return the id of the 23rd
-    * PowerUp that burned tokens in association with the keyword "shoes".
+    * PowerUp that spent ETH in association with the keyword "shoes".
     * @param keyword Keyword string for which the PowerUp ids will be fetched
     * @param index Index at which id of the PowerUp needs to be fetched
     */
@@ -244,21 +256,19 @@ contract PowerUps {
 
         require(
             amount > 0,
-            "Amount of tokens to burn should be greater than 0"
+            "Amount of ETH should be greater than 0"
         );
 
         powerUps.push(
             PowerUp({
-                contentAddress:contentAddress,
-                tokensBurned:amount,
-                lastTopupTime:block.timestamp,
+                contentAddress: contentAddress,
+                ethSpent: amount,
+                lastTopupTime: block.timestamp,
                 keyword: keyword
             })
         );
 
         keywordVsPowerUpIds[keyword].push(powerUps.length.sub(1));
-
-        token.burnFrom(msg.sender, amount);
 
         emit NewPowerUpAdded(msg.sender, powerUps.length.sub(1), amount);
 
