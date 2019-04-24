@@ -19,7 +19,7 @@ contract ERC20DividendYielding is IERC20 {
     using SafeMath for uint256;
 
     struct Dividend {
-        uint256 unclaimedSinceLastAccounting;
+        uint256 unclaimedAtLastAccounting;
         uint256 incomeAtLastAccounting;
     }
 
@@ -117,7 +117,7 @@ contract ERC20DividendYielding is IERC20 {
      * passed address.
      */
     function dividendBalanceOf(address account) public view returns (uint256) {
-        return _dividends[account].unclaimedSinceLastAccounting.add(
+        return _dividends[account].unclaimedAtLastAccounting.add(
             _earnedSinceLastAccounting(account)
         );
     }
@@ -234,7 +234,7 @@ contract ERC20DividendYielding is IERC20 {
         //require(msg.sender == account) //optional
         uint256 payout = dividendBalanceOf(account);
         require(payout > 0);
-        _dividends[account].unclaimedSinceLastAccounting = 0;
+        _dividends[account].unclaimedAtLastAccounting = 0;
         _dividends[account].incomeAtLastAccounting = totalIncome();
         _ethReleased = _ethReleased.add(payout);
         emit Claim(account, payout);
@@ -265,6 +265,11 @@ contract ERC20DividendYielding is IERC20 {
         returns (uint256)
     {
         return _incomeSinceLastAccounting(account).mul(balanceOf(account)).div(totalSupply());
+    }
+
+    function _dividendAccounting(address account) internal {
+        _dividends[account].unclaimedAtLastAccounting = _dividends[account].unclaimedAtLastAccounting.add(_earnedSinceLastAccounting(account));
+        _dividends[account].incomeAtLastAccounting = totalIncome();
     }
 
     /**
@@ -349,8 +354,4 @@ contract ERC20DividendYielding is IERC20 {
         _approve(account, msg.sender, _allowed[account][msg.sender].sub(value));
     }
 
-    function _dividendAccounting(address account) private {
-        _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
-        _dividends[account].incomeAtLastAccounting = totalIncome();
-    }
 }
