@@ -20,7 +20,7 @@ contract ERC20DividendYielding is IERC20 {
 
     struct Dividend {
         uint256 unclaimedSinceLastAccounting;
-        uint256 contractBalanceAtLastAccounting;
+        uint256 incomeAtLastAccounting;
     }
 
     mapping (address => uint256) private _balances;
@@ -31,7 +31,7 @@ contract ERC20DividendYielding is IERC20 {
 
     uint256 private _totalSupply;
 
-    uint256 private _dividendsReleased;
+    uint256 private _ethReleased;
 
     string private _name;
 
@@ -88,8 +88,15 @@ contract ERC20DividendYielding is IERC20 {
     /**
      * @dev Total amount of ETH released as dividends by this contract.
      */
-    function dividendsReleased() public view returns (uint256) {
-        return _dividendsReleased;
+    function ethReleased() public view returns (uint256) {
+        return _ethReleased;
+    }
+
+    /**
+     * @dev Total amount of ETH this contract has ever received
+     */
+    function totalIncome() public view returns (uint256) {
+        return address(this).balance.add(_ethReleased);
     }
 
     /**
@@ -223,12 +230,12 @@ contract ERC20DividendYielding is IERC20 {
      */
     function claimDividends(address payable account) public {
         //require(msg.sender == account) //optional
-        uint256 total = dividendBalanceOf(account);
-        require(total > 0);
+        uint256 payout = dividendBalanceOf(account);
+        require(payout > 0);
         _dividends[account].unclaimedSinceLastAccounting = 0;
-        _dividends[account].contractBalanceAtLastAccounting = address(this).balance.sub(total);
-        _dividendsReleased = _dividendsReleased.add(total);
-        account.transfer(total);
+        _dividends[account].incomeAtLastAccounting = totalIncome().sub(payout);
+        _ethReleased = _ethReleased.add(payout);
+        account.transfer(payout);
     }
 
     /**
@@ -236,12 +243,12 @@ contract ERC20DividendYielding is IERC20 {
      * dividend accounting for an address.
      * @param account The address in question.
      */
-    function _contractProfitSinceLastAccounting(address account)
+    function _incomeSinceLastAccounting(address account)
         internal
         view
         returns (uint256)
     {
-        return address(this).balance.add(_dividendsReleased).sub(_dividends[account].contractBalanceAtLastAccounting);
+        return _dividends[account].incomeAtLastAccounting.sub(totalIncome());
     }
 
     /**
@@ -254,7 +261,7 @@ contract ERC20DividendYielding is IERC20 {
         view
         returns (uint256)
     {
-        return _contractProfitSinceLastAccounting(account).mul(balanceOf(account)).div(totalSupply());
+        return _incomeSinceLastAccounting(account).mul(balanceOf(account)).div(totalSupply());
     }
 
     /**
@@ -269,11 +276,11 @@ contract ERC20DividendYielding is IERC20 {
 
         //dividend accounting for from address
         _dividends[from].unclaimedSinceLastAccounting = _dividends[from].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(from));
-        _dividends[from].contractBalanceAtLastAccounting = address(this).balance;
+        _dividends[from].incomeAtLastAccounting = totalIncome();
 
         //dividend accounting for to address
         _dividends[to].unclaimedSinceLastAccounting = _dividends[to].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(to));
-        _dividends[to].contractBalanceAtLastAccounting = address(this).balance;
+        _dividends[to].incomeAtLastAccounting = totalIncome();
 
         //token balance accounting
         _balances[from] = _balances[from].sub(value);
@@ -294,7 +301,7 @@ contract ERC20DividendYielding is IERC20 {
 
         //dividend accounting
         _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
-        _dividends[account].contractBalanceAtLastAccounting = address(this).balance;
+        _dividends[account].incomeAtLastAccounting = totalIncome();
 
         //token accounting
         _totalSupply = _totalSupply.add(value);
@@ -313,7 +320,7 @@ contract ERC20DividendYielding is IERC20 {
 
         //dividend accounting
         _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
-        _dividends[account].contractBalanceAtLastAccounting = address(this).balance;
+        _dividends[account].incomeAtLastAccounting = totalIncome();
 
         //token accounting
         _totalSupply = _totalSupply.sub(value);
