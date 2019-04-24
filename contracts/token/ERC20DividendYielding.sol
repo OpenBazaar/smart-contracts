@@ -39,6 +39,8 @@ contract ERC20DividendYielding is IERC20 {
 
     uint8 private _decimals;
 
+    event Claim(address indexed account, uint256 payout);
+
 
     constructor (
       string memory name,
@@ -235,6 +237,7 @@ contract ERC20DividendYielding is IERC20 {
         _dividends[account].unclaimedSinceLastAccounting = 0;
         _dividends[account].incomeAtLastAccounting = totalIncome().sub(payout);
         _ethReleased = _ethReleased.add(payout);
+        emit Claim(account, payout);
         account.transfer(payout);
     }
 
