@@ -293,6 +293,7 @@ contract ERC20DividendYielding is IERC20 {
         require(account != address(0), "ERC20: mint to the zero address");
 
         //dividend accounting
+        _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
         _dividends[account].contractBalanceAtLastAccounting = address(this).balance;
 
         //token accounting
