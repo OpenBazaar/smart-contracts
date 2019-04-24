@@ -235,7 +235,7 @@ contract ERC20DividendYielding is IERC20 {
         uint256 payout = dividendBalanceOf(account);
         require(payout > 0);
         _dividends[account].unclaimedSinceLastAccounting = 0;
-        _dividends[account].incomeAtLastAccounting = totalIncome().sub(payout);
+        _dividends[account].incomeAtLastAccounting = totalIncome();
         _ethReleased = _ethReleased.add(payout);
         emit Claim(account, payout);
         account.transfer(payout);
@@ -278,12 +278,8 @@ contract ERC20DividendYielding is IERC20 {
         require(to != address(0), "ERC20: transfer to the zero address");
 
         //dividend accounting for from address
-        _dividends[from].unclaimedSinceLastAccounting = _dividends[from].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(from));
-        _dividends[from].incomeAtLastAccounting = totalIncome();
-
-        //dividend accounting for to address
-        _dividends[to].unclaimedSinceLastAccounting = _dividends[to].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(to));
-        _dividends[to].incomeAtLastAccounting = totalIncome();
+        _dividendAccounting(from);
+        _dividendAccounting(to);
 
         //token balance accounting
         _balances[from] = _balances[from].sub(value);
@@ -302,11 +298,8 @@ contract ERC20DividendYielding is IERC20 {
     function _mint(address account, uint256 value) internal {
         require(account != address(0), "ERC20: mint to the zero address");
 
-        //dividend accounting
-        _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
-        _dividends[account].incomeAtLastAccounting = totalIncome();
+        _dividendAccounting(account);
 
-        //token accounting
         _totalSupply = _totalSupply.add(value);
         _balances[account] = _balances[account].add(value);
         emit Transfer(address(0), account, value);
@@ -321,9 +314,7 @@ contract ERC20DividendYielding is IERC20 {
     function _burn(address account, uint256 value) internal {
         require(account != address(0), "ERC20: burn from the zero address");
 
-        //dividend accounting
-        _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
-        _dividends[account].incomeAtLastAccounting = totalIncome();
+        _dividendAccounting(account);
 
         //token accounting
         _totalSupply = _totalSupply.sub(value);
@@ -356,5 +347,10 @@ contract ERC20DividendYielding is IERC20 {
     function _burnFrom(address account, uint256 value) internal {
         _burn(account, value);
         _approve(account, msg.sender, _allowed[account][msg.sender].sub(value));
+    }
+
+    function _dividendAccounting(address account) private {
+        _dividends[account].unclaimedSinceLastAccounting = _dividends[account].unclaimedSinceLastAccounting.add(_earnedSinceLastAccounting(account));
+        _dividends[account].incomeAtLastAccounting = totalIncome();
     }
 }
