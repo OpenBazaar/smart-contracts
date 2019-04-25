@@ -251,7 +251,7 @@ contract ERC20DividendYielding is IERC20 {
         view
         returns (uint256)
     {
-        return _dividends[account].incomeAtLastAccounting.sub(totalIncome());
+        return totalIncome().sub(_dividends[account].incomeAtLastAccounting);
     }
 
     /**
