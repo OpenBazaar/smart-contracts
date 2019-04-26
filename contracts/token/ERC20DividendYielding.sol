@@ -22,7 +22,10 @@ contract ERC20DividendYielding is IERC20 {
     using SafeMath for uint256;
 
     struct Dividend {
+        //amount of unclaimed dividends an address had the last time
+        //`_dividendAccounting` was called.
         uint256 unclaimedAtLastAccounting;
+        //this contract's totalIncome the last time `_dividendAccounting` was called
         uint256 incomeAtLastAccounting;
     }
 
