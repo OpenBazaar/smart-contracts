@@ -14,6 +14,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC20/ERC20Detailed.sol
  * The `_transfer`, `_mint`, and `_burn` functions have been modified.
  * Dividend receivers can withdraw thier funds via `claimDividends`.
+ * The function `_dividendAccounting(account)` MUST be called immediately before
+ * `account` undergoes any change in its token balance. This includes transfers,
+ * mints and burns.
  */
 contract ERC20DividendYielding is IERC20 {
     using SafeMath for uint256;
@@ -282,7 +285,7 @@ contract ERC20DividendYielding is IERC20 {
     function _transfer(address from, address to, uint256 value) internal {
         require(to != address(0), "ERC20: transfer to the zero address");
 
-        //dividend accounting for from address
+        //dividend accounting
         _dividendAccounting(from);
         _dividendAccounting(to);
 
