@@ -13,7 +13,7 @@ module.exports = {
       host: "localhost",
       port: 8545,
       network_id: "4", // Rinkeby network id
-      from:"0x3d7342d400aa70d1dd48ce09fd82db006ed21eee"
+      from:"0x84ef0571a9b311ac93a55d95646d4c26b0615460"
     },
     coverage: {
       host: "localhost",
