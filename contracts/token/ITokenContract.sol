@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 interface ITokenContract {
     function balanceOf(address _owner) external view returns (uint256 balance);

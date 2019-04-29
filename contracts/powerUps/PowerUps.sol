@@ -1,6 +1,6 @@
 /* solium-disable security/no-block-members */
 
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../token/ITokenContract.sol";
