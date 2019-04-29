@@ -1,6 +1,6 @@
 /* solium-disable security/no-block-members */
 
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
