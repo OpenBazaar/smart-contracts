@@ -18,7 +18,7 @@ contract PowerUps is Pausable {
 
     struct PowerUp {
         string contentAddress; // IPFS/IPNS address, peerID, etc
-        uint256 ethSpent; // total ETH spent towards this PowerUp
+        uint256 amount; // total ETH spent towards this PowerUp
         uint256 lastTopupTime; // last time ETH was added to this PowerUp
         bytes32 keyword; // search term, reserved keyword, etc
     }
@@ -30,13 +30,13 @@ contract PowerUps is Pausable {
     event NewPowerUpAdded(
         address indexed initiator,
         uint256 id, // the index of this PowerUp in the powerUps[] array
-        uint256 ethSpent
+        uint256 amount
     );
 
     event Topup(
         address indexed initiator,
         uint256 id, // the index of the PowerUp in the powerUps[] array
-        uint256 ethSpent
+        uint256 amount
     );
 
     modifier powerUpExists(uint256 id) {
@@ -49,7 +49,12 @@ contract PowerUps is Pausable {
         _;
     }
 
-    constructor(address payable _payoutAddress) public nonZeroAddress(_payoutAddress) {
+    constructor(
+        address payable _payoutAddress
+    )
+        public
+        nonZeroAddress(_payoutAddress)
+    {
         payoutAddress = _payoutAddress;
     }
 
@@ -117,7 +122,8 @@ contract PowerUps is Pausable {
             amountsTotal = amountsTotal.add(amounts[i]);
         }
 
-        require(amountsTotal == msg.value,
+        require(
+            amountsTotal == msg.value,
             "Total of amounts[] must equal the amount of ETH sent"
         );
 
@@ -142,7 +148,7 @@ contract PowerUps is Pausable {
             "Amount of ETH sent should be greater than 0"
         );
 
-        powerUps[id].ethSpent = powerUps[id].ethSpent.add(msg.value);
+        powerUps[id].amount = powerUps[id].amount.add(msg.value);
 
         powerUps[id].lastTopupTime = block.timestamp;
 
@@ -167,22 +173,20 @@ contract PowerUps is Pausable {
         view
         returns (
             string memory contentAddress,
-            uint256 ethSpent,
+            uint256 amount,
             uint256 lastTopupTime,
             bytes32 keyword
         )
     {
-        require(id < powerUps.length,
-            "invalid id passed"
-        );
+        require(id < powerUps.length, "invalid id passed");
 
         PowerUp storage powerUp = powerUps[id];
         contentAddress = powerUp.contentAddress;
-        ethSpent = powerUp.ethSpent;
+        amount = powerUp.amount;
         lastTopupTime = powerUp.lastTopupTime;
         keyword = powerUp.keyword;
 
-        return (contentAddress, ethSpent, lastTopupTime, keyword);
+        return (contentAddress, amount, lastTopupTime, keyword);
 
     }
 
@@ -262,7 +266,7 @@ contract PowerUps is Pausable {
         powerUps.push(
             PowerUp({
                 contentAddress: contentAddress,
-                ethSpent: amount,
+                amount: amount,
                 lastTopupTime: block.timestamp,
                 keyword: keyword
             })
