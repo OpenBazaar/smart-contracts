@@ -364,7 +364,6 @@ contract("Keyword Based Powerups Contract", function(account) {
   it("Top up listing with amount of tokens to burn as 0", async () => {
     var initiator = powerUps[ids[0]].initiator;
     var id = ids[0];
-
     var amount = 0;
 
     await this.OBT.approve(this.keywordPowerup.address, amount, {
@@ -380,8 +379,8 @@ contract("Keyword Based Powerups Contract", function(account) {
   });
 
   it("Get power up information for existing power up", async () => {
-    var powerUpInfo = await this.keywordPowerup.getPowerUpInfo(ids[0]);
-
+    var id = ids[0]
+    var powerUpInfo = await this.keywordPowerup.getPowerUpInfo(id);
     var receivedContentAddress = powerUpInfo[0];
     var receivedTokensBurnt = powerUpInfo[1];
     receivedTokensBurnt = new BigNumber(receivedTokensBurnt);

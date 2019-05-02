@@ -30,7 +30,7 @@
     "ripemd160": "^2.0.2",
     "secp256k1": "^3.5.0",
     "solidity-coverage": "github:rotcivegaf/solidity-coverage#5875f5b7bc74d447f3312c9c0e9fc7814b482477",
-    "truffle": "v5.0.6",
+    "truffle": "5.0.12",
     "web3": "^1.0.0-beta.34",
     "websocket": "^1.0.28",
     "yargs": "^11.0.0"
