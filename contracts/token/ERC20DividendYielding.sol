@@ -273,6 +273,13 @@ contract ERC20DividendYielding is IERC20 {
         return _incomeSinceLastAccounting(account).mul(balanceOf(account)).div(totalSupply());
     }
 
+    /**
+     * @dev Updates the value `_dividends[account].unclaimedAtLastAccounting`
+     * for a given account.
+     * Updates `_dividends[account].incomeAtLastAccounting` to reflect the
+     * most recent `totalIncome()` of the contract.
+     * @param account The address for which dividend accounting will be done.
+     */
     function _dividendAccounting(address account) internal {
         _dividends[account].unclaimedAtLastAccounting = _dividends[account].unclaimedAtLastAccounting.add(_earnedSinceLastAccounting(account));
         _dividends[account].incomeAtLastAccounting = totalIncome();
