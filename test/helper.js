@@ -74,15 +74,6 @@ const signMessageHash = (hash, signers) => {
   return {sigV: sigV, sigR: sigR, sigS: sigS}
 }
 
-const resetTime = async()=>{
-    await web3.currentProvider.send({
-        jsonrpc: '2.0', 
-        method: 'evm_mine', 
-        params: [Math.floor(new Date().getTime()/1000)], 
-        id: new Date().getTime()
-      }, function(err, result){
-    });
-}
   const increaseTime = async (seconds) => {
     
     await web3.currentProvider.send({
