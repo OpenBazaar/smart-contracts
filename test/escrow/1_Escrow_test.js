@@ -1,11 +1,9 @@
 var Escrow = artifacts.require("Escrow");
 var TestToken = artifacts.require("TestToken");
 var EscrowProxy = artifacts.require("EscrowProxy");
-
 var Web3 = require("web3");
 var web3 = new Web3("http://localhost:8555");
 var BigNumber = require('bignumber.js');
-
 var helper = require("../helper.js");
 
 contract("Escrow Contract", function() {

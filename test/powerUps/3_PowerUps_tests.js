@@ -1,9 +1,8 @@
 var PowerUps = artifacts.require("PowerUps");
 var OBToken = artifacts.require("OBToken");
 var Web3 = require("web3");
-var web3 = new Web3("http://localhost:8555");
+var web3 = new Web3();
 var BigNumber = require("bignumber.js");
-var helper = require("../helper.js");
 
 contract("Keyword Based Powerups Contract", function(account) {
   var ids = new Array();
@@ -53,18 +52,11 @@ contract("Keyword Based Powerups Contract", function(account) {
     keywordVsPowerUpIds[keywords[3]] = new Array();
   });
 
-  it("Add new Power up", async () => {
-    var initiator = account[1];
-    var contentAddress = "QmTDMoVqvyBkNMRhzvukTDznntByUNDwyNdSfV8dZ3VKRC";
-    var amount = web3.utils.toWei("1000", "ether");
-    var keyword = keywords[0];
-
+  var addPowerup = async(initiator, contentAddress, amount, keyword) => {
     await this.OBT.approve(this.keywordPowerup.address, amount, {
       from: initiator
     });
-
     var initiatorTokenBalanceBefore = await this.OBT.balanceOf(initiator);
-
     initiatorTokenBalanceBefore = new BigNumber(initiatorTokenBalanceBefore);
 
     var txResult = await this.keywordPowerup.addPowerUp(
@@ -96,7 +88,6 @@ contract("Keyword Based Powerups Contract", function(account) {
     );
 
     var initiatorTokenBalanceAfter = await this.OBT.balanceOf(initiator);
-
     initiatorTokenBalanceAfter = new BigNumber(initiatorTokenBalanceAfter);
 
     assert.equal(
@@ -110,9 +101,126 @@ contract("Keyword Based Powerups Contract", function(account) {
     powerUps[receivedId] = new Object();
     powerUps[receivedId].contentAddress = contentAddress;
     powerUps[receivedId].initiator = initiator;
-    powerUps[receivedId].tokensBurnt = Number(amount);
+    powerUps[receivedId].tokensBurnt = new BigNumber(amount);
 
     keywordVsPowerUpIds[keyword].push(receivedId);
+  };
+
+  var addMultiplePowerups = async(initiator, contentAddress, amounts, keywords) => {
+
+    var amount = new BigNumber(0);
+    
+    for(var i = 0;i<amounts.length;i++){
+      amount = amount.plus(new BigNumber(amounts[i]));
+    }
+    await this.OBT.approve(this.keywordPowerup.address, amount.toString(10), {
+      from: initiator
+    });
+
+    var initiatorTokenBalanceBefore = await this.OBT.balanceOf(initiator);
+    initiatorTokenBalanceBefore = new BigNumber(initiatorTokenBalanceBefore);
+
+    var txResult = await this.keywordPowerup.addPowerUps(
+      contentAddress,
+      amounts,
+      keywords,
+      { from: initiator }
+    );
+
+    for (var i = 0; i < 4; i++) {
+      var receivedEvent = txResult.logs[i].event;
+      var receivedinitiator = txResult.logs[i].args.initiator;
+      var receivedId = txResult.logs[i].args.id;
+      var receivedTokensBurnt = txResult.logs[i].args.tokensBurned;
+      receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
+      assert.equal(
+        receivedEvent,
+        "NewPowerUpAdded",
+        "NewPowerUpAdded event should be fired"
+      );
+      assert.equal(
+        receivedinitiator,
+        initiator,
+        "Received initiator and passed initiator must match"
+      );
+      assert.equal(
+        receivedTokensBurnt.toNumber(),
+        amounts[i],
+        "Received and passed token amount to burn must match"
+      );
+
+      ids.push(receivedId);
+
+      powerUps[receivedId] = new Object();
+      powerUps[receivedId].contentAddress = contentAddress;
+      powerUps[receivedId].initiator = initiator;
+      powerUps[receivedId].tokensBurnt = amount;
+
+      keywordVsPowerUpIds[keywords[i]].push(receivedId);
+    }
+
+    var initiatorTokenBalanceAfter = await this.OBT.balanceOf(initiator);
+    initiatorTokenBalanceAfter = new BigNumber(initiatorTokenBalanceAfter);
+    assert.equal(
+      initiatorTokenBalanceBefore.toNumber(),
+      initiatorTokenBalanceAfter.plus(amount).toNumber(),
+      "initiator's token balance must reduce by the amount sent"
+    );
+  };
+
+  var topup = async(initiator, id, amount) => {
+
+    await this.OBT.approve(this.keywordPowerup.address, amount, {
+      from: initiator
+    });
+
+    var initiatorTokenBalanceBefore = await this.OBT.balanceOf(initiator);
+    initiatorTokenBalanceBefore = new BigNumber(initiatorTokenBalanceBefore);
+
+    var txResult = await this.keywordPowerup.topUpPowerUp(id, amount, {
+      from: initiator
+    });
+
+    var receivedEvent = txResult.logs[0].event;
+    var receivedinitiator = txResult.logs[0].args.initiator;
+    var receivedId = txResult.logs[0].args.id;
+    var receivedTokensBurnt = txResult.logs[0].args.tokensBurned;
+    receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
+    assert.equal(receivedEvent, "Topup", "Topup event should be fired");
+    assert.equal(
+      receivedinitiator,
+      initiator,
+      "Received initiator and passed initiator must match"
+    );
+    assert.equal(
+      receivedId.toNumber(),
+      id.toNumber(),
+      "Received and passed id must match"
+    );
+    assert.equal(
+      receivedTokensBurnt.toNumber(),
+      amount,
+      "Received and passed token amount to burn must match"
+    );
+
+    var initiatorTokenBalanceAfter = await this.OBT.balanceOf(initiator);
+    initiatorTokenBalanceAfter = new BigNumber(initiatorTokenBalanceAfter);
+
+    assert.equal(
+      initiatorTokenBalanceBefore.toNumber(),
+      initiatorTokenBalanceAfter.plus(Number(amount)).toNumber(),
+      "initiator's token balance must reduce by the amount sent"
+    );
+    powerUps[id].tokensBurnt = powerUps[id].tokensBurnt.plus(new BigNumber(amount));
+  };
+
+  it("Add new Power up", async () => {
+    var initiator = account[1];
+    var contentAddress = "QmTDMoVqvyBkNMRhzvukTDznntByUNDwyNdSfV8dZ3VKRC";
+    var amount = web3.utils.toWei("1000", "ether");
+    var keyword = keywords[0];
+
+    await addPowerup(initiator, contentAddress, amount, keyword);
   });
 
   it("Add new power up with tokens to burn as 0", async () => {
@@ -122,14 +230,8 @@ contract("Keyword Based Powerups Contract", function(account) {
     var amount = 0;
     var keyword = keywords[0];
 
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
-
     try {
-      await this.keywordPowerup.addPowerUp(contentAddress, amount, keyword, {
-        from: initiator
-      });
+      await addPowerup(initiator, contentAddress, amount, keyword);
       assert.equal(true, false, "Add listing must fail for amount 0");
     } catch (error) {
       assert.notInclude(error.toString(), "AssertionError", error.message);
@@ -142,14 +244,8 @@ contract("Keyword Based Powerups Contract", function(account) {
     var amount = web3.utils.toWei("1000", "ether");
     var keyword = keywords[0];
 
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
-
     try {
-      await this.keywordPowerup.addPowerUp(contentAddress, amount, keyword, {
-        from: initiator
-      });
+      await addPowerup(initiator, contentAddress, amount, keyword);
       assert.equal(
         true,
         false,
@@ -187,12 +283,7 @@ contract("Keyword Based Powerups Contract", function(account) {
     var keyword = keywords[0];
 
     try {
-      await this.OBT.approve(this.keywordPowerup.address, amount, {
-        from: initiator
-      });
-      await this.keywordPowerup.addPowerUp(contentAddress, amount, keyword, {
-        from: initiator
-      });
+      await addPowerup(initiator, contentAddress, amount, keyword);
       assert.equal(
         true,
         false,
@@ -202,6 +293,7 @@ contract("Keyword Based Powerups Contract", function(account) {
       assert.notInclude(error.toString(), "AssertionError", error.message);
     }
   });
+
   it("Add multiple power-ups with different keyword for same content address", async () => {
     var contentAddress =
       "TmTDMoVqvyBkNMRhzvukTDznntByUNgkhasdgashdjhd0892138291038DwyNdSfV8dZ3VKRC";
@@ -214,129 +306,24 @@ contract("Keyword Based Powerups Contract", function(account) {
     amounts.push(web3.utils.toWei("3000", "ether"));
     amounts.push(web3.utils.toWei("4000", "ether"));
 
-    var amount = web3.utils.toWei("10000", "ether");
-
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
-
-    var initiatorTokenBalanceBefore = await this.OBT.balanceOf(initiator);
-
-    initiatorTokenBalanceBefore = new BigNumber(initiatorTokenBalanceBefore);
-
-    var txResult = await this.keywordPowerup.addPowerUps(
-      contentAddress,
-      amounts,
-      keywords,
-      { from: initiator }
-    );
-
-    for (var i = 0; i < 4; i++) {
-      var receivedEvent = txResult.logs[i].event;
-      var receivedinitiator = txResult.logs[i].args.initiator;
-      var receivedId = txResult.logs[i].args.id;
-      var receivedTokensBurnt = txResult.logs[i].args.tokensBurned;
-      receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
-      assert.equal(
-        receivedEvent,
-        "NewPowerUpAdded",
-        "NewPowerUpAdded event should be fired"
-      );
-      assert.equal(
-        receivedinitiator,
-        initiator,
-        "Received initiator and passed initiator must match"
-      );
-      assert.equal(
-        receivedTokensBurnt.toNumber(),
-        amounts[i],
-        "Received and passed token amount to burn must match"
-      );
-
-      ids.push(receivedId);
-
-      powerUps[receivedId] = new Object();
-      powerUps[receivedId].contentAddress = contentAddress;
-      powerUps[receivedId].initiator = initiator;
-      powerUps[receivedId].tokensBurnt = Number(amount);
-
-      keywordVsPowerUpIds[keywords[i]].push(receivedId);
-    }
-
-    var initiatorTokenBalanceAfter = await this.OBT.balanceOf(initiator);
-
-    initiatorTokenBalanceAfter = new BigNumber(initiatorTokenBalanceAfter);
-    assert.equal(
-      initiatorTokenBalanceBefore.toNumber(),
-      initiatorTokenBalanceAfter.plus(Number(amount)).toNumber(),
-      "initiator's token balance must reduce by the amount sent"
-    );
+    await addMultiplePowerups(initiator, contentAddress, amounts, keywords);
   });
 
   it("Topup power up", async () => {
     var initiator = powerUps[ids[0]].initiator;
     var id = ids[0];
-
     var amount = web3.utils.toWei("2000", "ether");
 
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
-
-    var initiatorTokenBalanceBefore = await this.OBT.balanceOf(initiator);
-
-    initiatorTokenBalanceBefore = new BigNumber(initiatorTokenBalanceBefore);
-
-    var txResult = await this.keywordPowerup.topUpPowerUp(id, amount, {
-      from: initiator
-    });
-
-    var receivedEvent = txResult.logs[0].event;
-    var receivedinitiator = txResult.logs[0].args.initiator;
-    var receivedId = txResult.logs[0].args.id;
-    var receivedTokensBurnt = txResult.logs[0].args.tokensBurned;
-    receivedTokensBurnt = new BigNumber(receivedTokensBurnt);
-    assert.equal(receivedEvent, "Topup", "Topup event should be fired");
-    assert.equal(
-      receivedinitiator,
-      initiator,
-      "Received initiator and passed initiator must match"
-    );
-    assert.equal(
-      receivedId.toNumber(),
-      id.toNumber(),
-      "Received and passed id must match"
-    );
-    assert.equal(
-      receivedTokensBurnt.toNumber(),
-      amount,
-      "Received and passed token amount to burn must match"
-    );
-
-    var initiatorTokenBalanceAfter = await this.OBT.balanceOf(initiator);
-
-    initiatorTokenBalanceAfter = new BigNumber(initiatorTokenBalanceAfter);
-
-    assert.equal(
-      initiatorTokenBalanceBefore.toNumber(),
-      initiatorTokenBalanceAfter.plus(Number(amount)).toNumber(),
-      "initiator's token balance must reduce by the amount sent"
-    );
-
-    powerUps[id].tokensBurnt = Number(amount) + powerUps[id].tokensBurnt;
+    await topup(initiator, id, amount);
   });
 
   it("Topup non-existing powerup", async () => {
     var initiator = powerUps[ids[0]].initiator;
     var id = 29;
-
     var amount = web3.utils.toWei("2000", "ether");
 
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
     try {
-      await this.keywordPowerup.topUpPowerUp(id, amount, { from: initiator });
+      await topup(initiator, id, amount);
       assert.equal(true, false, "Topup must fail for non-existing powerup");
     } catch (error) {
       assert.notInclude(error.toString(), "AssertionError", error.message);
@@ -346,9 +333,8 @@ contract("Keyword Based Powerups Contract", function(account) {
   it("Topup listing without approving contract to burn tokens on behalf of initiator", async () => {
     var initiator = powerUps[ids[0]].initiator;
     var id = ids[0];
-
     var amount = web3.utils.toWei("7000", "ether");
-
+    
     try {
       await this.keywordPowerup.topUpPowerUp(id, amount, { from: initiator });
       assert.equal(
@@ -366,12 +352,8 @@ contract("Keyword Based Powerups Contract", function(account) {
     var id = ids[0];
     var amount = 0;
 
-    await this.OBT.approve(this.keywordPowerup.address, amount, {
-      from: initiator
-    });
-
     try {
-      await this.keywordPowerup.topUpPowerUp(id, amount, { from: initiator });
+      await topup(initiator, id, amount);
       assert.equal(true, false, "Topup must fail with topup amount as 0");
     } catch (error) {
       assert.notInclude(error.toString(), "AssertionError", error.message);
@@ -398,7 +380,6 @@ contract("Keyword Based Powerups Contract", function(account) {
 
   it("Get power up information for non-existing power up", async () => {
     var powerUpInfo = await this.keywordPowerup.getPowerUpInfo("29");
-
     var receivedContentAddress = powerUpInfo[0];
     var receivedTokensBurnt = powerUpInfo[1];
 
